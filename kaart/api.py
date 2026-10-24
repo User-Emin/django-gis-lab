@@ -174,6 +174,7 @@ class ProjectViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 # Les 15: schrijven. Alleen dit endpoint vraagt inloggen; de rest blijft AllowAny/alleen lezen.
+ALMERE_GRENZEN = (133000, 472000, 165000, 497000)  # ruwe bbox gemeente Almere (RD, m)
 RD_GRENZEN = (-7000, 289000, 300000, 629000)  # geldigheidsgebied RD New (EPSG:28992), meters
 
 
@@ -207,6 +208,15 @@ class GebiedInvoer(serializers.Serializer):
             raise serializers.ValidationError("x buiten het RD-gebied (-7000 tot 300000 m).")
         if not (RD_GRENZEN[1] <= miny and maxy <= RD_GRENZEN[3]):
             raise serializers.ValidationError("y buiten het RD-gebied (289000 tot 629000 m).")
+        if not (
+            ALMERE_GRENZEN[0] <= minx
+            and maxx <= ALMERE_GRENZEN[2]
+            and ALMERE_GRENZEN[1] <= miny
+            and maxy <= ALMERE_GRENZEN[3]
+        ):
+            raise serializers.ValidationError(
+                "Het vlak ligt buiten Almere (bbox 133000,472000 - 165000,497000 in RD)."
+            )
         return geom
 
 

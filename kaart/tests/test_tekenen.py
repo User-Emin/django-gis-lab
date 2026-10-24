@@ -130,3 +130,30 @@ def test_tag_zonder_build_geeft_duidelijke_fout(settings, tmp_path):
 
     with pytest.raises(TemplateSyntaxError, match="npm run build"):
         Template('{% load vite %}{% vite_js "src/main.ts" %}').render(Context())
+
+
+def test_vlak_buiten_almere_geeft_400(browser, project):
+    """Zelf 15: een geldig RD-vlak in Amsterdam (x 121000, y 487000) wordt geweigerd."""
+    inloggen(browser)
+    amsterdam = {
+        "type": "Polygon",
+        "coordinates": [
+            [
+                [121000, 487000],
+                [121100, 487000],
+                [121100, 487100],
+                [121000, 487100],
+                [121000, 487000],
+            ]
+        ],
+    }
+    r = browser.post(
+        "/api/gebieden/",
+        data=json.dumps({"project": project.pk, "geometry": amsterdam}),
+        content_type="application/json",
+        HTTP_X_CSRFTOKEN=browser.cookies["csrftoken"].value,
+    )
+    assert r.status_code == 400
+    assert "buiten Almere" in json.dumps(r.json())
+    project.refresh_from_db()
+    assert project.gebied is None

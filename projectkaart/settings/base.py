@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.gis",
     "kaart",
 ]
 
@@ -78,7 +79,7 @@ WSGI_APPLICATION = "projectkaart.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
         "NAME": env("DB_NAME", "djangolab"),
         "USER": env("DB_USER", os.environ.get("USER", "postgres")),
         "PASSWORD": env("DB_PASSWORD", ""),
@@ -86,6 +87,12 @@ DATABASES = {
         "PORT": env_int("DB_PORT", 5433),
     }
 }
+
+# Alleen nodig als GDAL/GEOS op een ongebruikelijke plek staan (les 09).
+if os.environ.get("GDAL_LIBRARY_PATH"):
+    GDAL_LIBRARY_PATH = os.environ["GDAL_LIBRARY_PATH"]
+if os.environ.get("GEOS_LIBRARY_PATH"):
+    GEOS_LIBRARY_PATH = os.environ["GEOS_LIBRARY_PATH"]
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},

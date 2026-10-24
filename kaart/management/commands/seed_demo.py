@@ -1,5 +1,6 @@
 import random
 
+from django.contrib.gis.geos import Point
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
@@ -29,13 +30,19 @@ class Command(BaseCommand):
         nieuw = 0
         for i in range(projecten):
             naam = f"{SOORTEN[i % len(SOORTEN)]} {STRAATEN[i % len(STRAATEN)]} {i + 1}"
+            # willekeurig punt in Almere Stad (RD New, meters)
+            locatie = Point(rng.uniform(142600, 144500), rng.uniform(485900, 487700), srid=28992)
             project, gemaakt = Project.objects.get_or_create(
                 naam=naam,
                 defaults={
                     "opdrachtgever": "Gemeente Almere",
                     "status": rng.choice(Project.Status.values),
+                    "locatie": locatie,
                 },
             )
+            if project.locatie is None:
+                project.locatie = locatie
+                project.save(update_fields=["locatie"])
             if gemaakt:
                 nieuw += 1
                 for j in range(rng.randint(2, 5)):

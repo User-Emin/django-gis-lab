@@ -1,4 +1,4 @@
-from django.db import models
+from django.contrib.gis.db import models
 
 
 class Project(models.Model):
@@ -11,6 +11,8 @@ class Project(models.Model):
     opdrachtgever = models.CharField(max_length=120)
     status = models.CharField(max_length=20, choices=Status, default=Status.CONCEPT)
     aangemaakt = models.DateTimeField(auto_now_add=True)
+    # RD New (EPSG:28992): x/y in meters, zie les 02
+    locatie = models.PointField(srid=28992, null=True, blank=True)
 
     class Meta:
         ordering = ["naam"]

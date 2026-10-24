@@ -13,6 +13,7 @@ class Project(models.Model):
     aangemaakt = models.DateTimeField(auto_now_add=True)
     # RD New (EPSG:28992): x/y in meters, zie les 02
     locatie = models.PointField(srid=28992, null=True, blank=True)
+    gebied = models.PolygonField(srid=28992, null=True, blank=True)
 
     class Meta:
         ordering = ["naam"]

@@ -15,6 +15,7 @@ Elke les heeft een tag: `git checkout les-NN`.
 | les-15 | Vite-build naar Django static, tekenen (ol Draw) en opslaan met POST + CSRF |
 | les-16 | vector tiles uit PostGIS (ST_AsMVT, RD-tegels op het PDOK-grid via ST_TileEnvelope met bounds), OL VectorTile achter `?panden=tiles`, cache |
 | les-17 | DXF van binnen: ezdxf (HEADER/TABLES/BLOCKS/ENTITIES), `$INSUNITS`, bulge, ruimtes uit laag 92, `manage.py dxf_inhoud` (oefendata in `data/cad/`) |
+| les-18 | DXF importeren: upload-formulier (multipart), `importeer_dxf` met rapport, eigen SRID 990001 voor tekeningcoördinaten, GDAL `ogr2ogr` ter vergelijking, tekening-kaart in OpenLayers |
 
 Starten: `cp .env.example .env`, `uv sync`, `uv run python manage.py runserver 127.0.0.1:8700`.
 Database: PostgreSQL op 127.0.0.1:5433, database `djangolab`.

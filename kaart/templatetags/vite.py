@@ -30,7 +30,16 @@ def laad_manifest() -> dict:
 @register.simple_tag
 def vite_css(entry: str):
     """<link>-tags voor de CSS van een entry."""
-    bestanden = laad_manifest()[entry].get("css", [])
+    manifest = laad_manifest()
+    bestanden: list[str] = []
+
+    def verzamel(sleutel: str):
+        # Met twee entries delen die een chunk (ol); de CSS van gedeelde chunks hoort er ook bij.
+        for naam in manifest[sleutel].get("imports", []):
+            verzamel(naam)
+        bestanden.extend(b for b in manifest[sleutel].get("css", []) if b not in bestanden)
+
+    verzamel(entry)
     return format_html_join(
         "\n", '<link rel="stylesheet" href="{}">', ((static(f"app/{b}"),) for b in bestanden)
     )

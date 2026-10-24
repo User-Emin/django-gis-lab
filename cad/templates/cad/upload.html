@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}DXF uploaden{% endblock %}
+{% block content %}
+<h1>DXF uploaden</h1>
+<p>Alleen <code>.dxf</code>, maximaal {{ max_mb|default:"10" }} MB. De ruimtes (laag <code>92 …</code>) worden geïmporteerd.</p>
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  {{ form.non_field_errors }}
+  {% for veld in form %}
+    <div>
+      {{ veld.label_tag }}
+      {{ veld }}
+      {{ veld.errors }}
+    </div>
+  {% endfor %}
+  <button type="submit">Uploaden en importeren</button>
+</form>
+{% endblock %}

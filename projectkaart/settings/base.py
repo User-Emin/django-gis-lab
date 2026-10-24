@@ -116,6 +116,12 @@ TIME_ZONE = "Europe/Amsterdam"
 USE_I18N = True
 USE_TZ = True
 
+MEDIA_URL = "media/"
+MEDIA_ROOT = BASE_DIR / "media"
+LOGIN_URL = "/admin/login/"
+# Upload van DXF-tekeningen (cad-app): maximale grootte in bytes
+CAD_MAX_UPLOAD_BYTES = 10 * 1024 * 1024
+
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 # Les 15: `npm run build` (Vite) schrijft naar kaart/static/app/, met manifest in .vite/

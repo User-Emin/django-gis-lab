@@ -14,3 +14,4 @@ _manifests/
 node_modules/
 frontend/dist/
 kaart/static/app/
+media/

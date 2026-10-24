@@ -9,7 +9,7 @@ export default defineConfig(({ command }) => ({
     outDir: "../kaart/static/app",
     emptyOutDir: true,
     manifest: true,
-    rollupOptions: { input: "src/main.ts" },
+    rollupOptions: { input: ["src/main.ts", "src/tekening.ts"] },
   },
   server: {
     host: "127.0.0.1",

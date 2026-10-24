@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load vite %}
+{% block title %}{{ tekening.naam }}{% endblock %}
+{% block content %}
+<h1>{{ tekening.naam }}</h1>
+<p>Eenheid in de tekening: {{ tekening.eenheid }}. BAG-pand: {{ tekening.bag_pand_id|default:"onbekend" }}.
+  Totaal {{ tekening.rapport.totaal_m2 }} m². <a href="{% url 'cad:upload' %}">Nog een DXF uploaden</a></p>
+<h2>Importrapport</h2>
+<table id="rapport">
+  <thead><tr><th>Soort</th><th>Aantal</th><th>Details</th></tr></thead>
+  <tbody>
+  {% for label, aantal, items in rijen %}
+    <tr><td>{{ label }}</td><td>{{ aantal }}</td>
+      <td>{{ items|join:'; ' }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+<h2>Kaart (lokaal stelsel, meters)</h2>
+<div id="plattegrond" data-url="{% url 'cad:ruimtes' tekening.pk %}"
+     style="height: 520px; border: 1px solid #d8dee4; background: #fafafa;"></div>
+{% vite_css "src/tekening.ts" %}
+{% vite_js "src/tekening.ts" %}
+{% endblock %}

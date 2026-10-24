@@ -46,3 +46,16 @@ def test_statuspagina_json():
         r = c.get("/cad/taak/onbekend-id/?format=json")
     assert r.status_code == 200
     assert r.json()["status"] == "PENDING"
+
+
+def test_timeout_wordt_herhaald_met_max_retries():
+    import subprocess
+
+    from celery.exceptions import Retry  # noqa: F401
+
+    assert rcs_check.max_retries == 3
+    assert rcs_check.retry_backoff is True
+    with patch("cad.tasks.subprocess.run", side_effect=subprocess.TimeoutExpired("x", 1)) as run:
+        r = rcs_check.apply(args=[str(DATA / "plattegrond-bg.dxf")])
+    assert r.status == "FAILURE"
+    assert run.call_count == 4  # 1 poging + 3 herhalingen

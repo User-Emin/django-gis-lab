@@ -16,7 +16,13 @@ from django.conf import settings
 RCS_CHECK = Path(settings.BASE_DIR) / "autocad" / "python-ezdxf" / "rcs_check.py"
 
 
-@shared_task(name="cad.rcs_check")
+@shared_task(
+    name="cad.rcs_check",
+    autoretry_for=(subprocess.TimeoutExpired,),
+    retry_backoff=True,
+    retry_backoff_max=60,
+    max_retries=3,
+)
 def rcs_check(dxf_pad: str) -> dict:
     """Voert rcs_check.py uit op een DXF. Exit 1 (bevindingen) is geen fout; andere exits wel."""
     pad = Path(dxf_pad)

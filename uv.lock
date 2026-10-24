@@ -388,6 +388,7 @@ dependencies = [
     { name = "psycopg", extra = ["binary"] },
     { name = "python-dotenv" },
     { name = "redis" },
+    { name = "shapely" },
     { name = "whitenoise" },
 ]
 
@@ -400,7 +401,6 @@ dev = [
     { name = "pytest-django" },
     { name = "respx" },
     { name = "ruff" },
-    { name = "shapely" },
 ]
 
 [package.metadata]
@@ -418,6 +418,7 @@ requires-dist = [
     { name = "psycopg", extras = ["binary"], specifier = ">=3.3.6" },
     { name = "python-dotenv", specifier = ">=1.2.4" },
     { name = "redis", specifier = ">=8.1.0" },
+    { name = "shapely", specifier = ">=2.2.0" },
     { name = "whitenoise", specifier = ">=6.12.0" },
 ]
 
@@ -430,7 +431,6 @@ dev = [
     { name = "pytest-django", specifier = ">=4.14.0" },
     { name = "respx", specifier = ">=0.23.1" },
     { name = "ruff", specifier = ">=0.17.2" },
-    { name = "shapely", specifier = ">=2.2.0" },
 ]
 
 [[package]]

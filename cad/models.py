@@ -31,6 +31,12 @@ class Tekening(models.Model):
     eenheid = models.CharField(max_length=10, help_text="Uit $INSUNITS, bv. 'mm'")
     geupload_op = models.DateTimeField(auto_now_add=True)
     rapport = models.JSONField(default=dict, blank=True)
+    # Les 19. Paspunten: [{naam, lokaal: [x, y] m, rd: [x, y] m}]. Bewust JSON op Tekening en
+    # geen eigen model: ze horen bij precies een tekening, worden altijd als hele set gelezen
+    # en nooit los bevraagd of gejoind; een FK-model zou alleen extra rijen en een join geven.
+    paspunten = models.JSONField(default=list, blank=True)
+    # Uitkomst van georefereer: soort, matrix, rmse, rotatie, schaal, residuen.
+    georef = models.JSONField(default=dict, blank=True)
 
     class Meta:
         ordering = ["-geupload_op"]

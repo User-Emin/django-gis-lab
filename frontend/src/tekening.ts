@@ -7,6 +7,7 @@ import VectorSource from "ol/source/Vector";
 import Projection from "ol/proj/Projection";
 import { Fill, Stroke, Style, Text } from "ol/style";
 import type { FeatureLike } from "ol/Feature";
+import { RD, RESOLUTIONS, brtAchtergrond } from "./rd";
 
 // Les 18: een lokaal assenstelsel (meters), zonder ondergrond. De code is vrij gekozen en
 // komt overeen met SRID 990001 in PostGIS; OpenLayers rekent er niet naartoe om.
@@ -27,7 +28,20 @@ function stijl(f: FeatureLike): Style {
   });
 }
 
-async function start() {
+// Foutvlakken (alleen in RD, uit /fouten/): soort = overlap | buiten | pand
+function foutStijl(f: FeatureLike): Style {
+  const soort = f.get("soort");
+  if (soort === "pand") {
+    return new Style({ stroke: new Stroke({ color: "#111", width: 3 }) });
+  }
+  const kleur = soort === "overlap" ? "200, 30, 30" : "230, 120, 0";
+  return new Style({
+    fill: new Fill({ color: `rgba(${kleur}, 0.7)` }),
+    stroke: new Stroke({ color: `rgb(${kleur})`, width: 2 }),
+  });
+}
+
+async function startLokaal() {
   const json = await (await fetch(doel.dataset.url!)).json();
   const extent = json.bbox as [number, number, number, number];
   const lokaal = new Projection({ code: "LOKAAL:990001", units: "m", extent });
@@ -42,4 +56,30 @@ async function start() {
   (window as unknown as Record<string, unknown>).plattegrond = kaart;
   kaart.once("rendercomplete", () => doel.setAttribute("data-klaar", "ja"));
 }
-start();
+
+// Met geom_rd: de ruimtes in EPSG:28992 op de PDOK BRT-achtergrondkaart (setup uit rd.ts).
+async function startRd() {
+  const [ruimtes, fouten] = await Promise.all([
+    fetch(doel.dataset.url!).then((r) => r.json()),
+    fetch(doel.dataset.fouten!).then((r) => r.json()),
+  ]);
+  const formaat = new GeoJSON({ dataProjection: RD, featureProjection: RD });
+  const ruimteBron = new VectorSource({ features: formaat.readFeatures(ruimtes) });
+  const foutBron = new VectorSource({ features: formaat.readFeatures(fouten) });
+  const kaart = new Map({
+    target: doel,
+    layers: [
+      brtAchtergrond(),
+      new VectorLayer({ source: ruimteBron, style: stijl }),
+      new VectorLayer({ source: foutBron, style: foutStijl }),
+    ],
+    view: new View({ projection: RD, center: [0, 0], zoom: 0, resolutions: RESOLUTIONS }),
+  });
+  const extent = ruimtes.bbox as [number, number, number, number];
+  kaart.getView().fit(extent, { padding: [40, 40, 40, 40], maxZoom: 14 });
+  (window as unknown as Record<string, unknown>).plattegrond = kaart;
+  kaart.once("rendercomplete", () => doel.setAttribute("data-klaar", "ja"));
+}
+
+if (doel.dataset.modus === "rd") startRd();
+else startLokaal();

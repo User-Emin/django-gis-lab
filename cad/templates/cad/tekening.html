@@ -15,9 +15,20 @@
   {% endfor %}
   </tbody>
 </table>
+{% if rd %}
+<h2>Kaart (RD, EPSG:28992, op de PDOK BRT-achtergrondkaart)</h2>
+<p>Blauw: ruimtes. Zwarte contour: BAG-pand {{ tekening.bag_pand_id|default:"0034100000049762" }}.
+  Rood gestippeld: ongeldige ruimte. Rood: overlap tussen twee ruimtes. Oranje: buiten het pand.
+  <a href="?crs=lokaal">Lokale weergave</a></p>
+<div id="plattegrond" data-modus="rd"
+     data-url="{% url 'cad:ruimtes' tekening.pk %}?crs=rd"
+     data-fouten="{% url 'cad:fouten' tekening.pk %}"
+     style="height: 560px; border: 1px solid #d8dee4; background: #fafafa;"></div>
+{% else %}
 <h2>Kaart (lokaal stelsel, meters)</h2>
-<div id="plattegrond" data-url="{% url 'cad:ruimtes' tekening.pk %}"
+<div id="plattegrond" data-modus="lokaal" data-url="{% url 'cad:ruimtes' tekening.pk %}"
      style="height: 520px; border: 1px solid #d8dee4; background: #fafafa;"></div>
+{% endif %}
 {% vite_css "src/tekening.ts" %}
 {% vite_js "src/tekening.ts" %}
 {% endblock %}

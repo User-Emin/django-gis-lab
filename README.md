@@ -12,6 +12,8 @@ Elke les heeft een tag: `git checkout les-NN`.
 | les-07 | views, templates, formulier met validatie en CSRF |
 | les-08 | pytest-django, factory-boy, coverage |
 | les-11 | ruimtelijke lookups, dwithin (RD en geography), Distance, EXPLAIN met/zonder GiST |
+| les-15 | Vite-build naar Django static, tekenen (ol Draw) en opslaan met POST + CSRF |
+| les-16 | vector tiles uit PostGIS (ST_AsMVT, RD-tegels op het PDOK-grid via ST_TileEnvelope met bounds), OL VectorTile achter `?panden=tiles`, cache |
 
 Starten: `cp .env.example .env`, `uv sync`, `uv run python manage.py runserver 127.0.0.1:8700`.
 Database: PostgreSQL op 127.0.0.1:5433, database `djangolab`.

@@ -10,6 +10,10 @@ import type WMTS from "ol/source/WMTS";
 import OSM from "ol/source/OSM";
 import VectorSource from "ol/source/Vector";
 import { bbox as bboxStrategy } from "ol/loadingstrategy";
+import VectorTileLayer from "ol/layer/VectorTile";
+import VectorTileSource from "ol/source/VectorTile";
+import MVT from "ol/format/MVT";
+import TileGrid from "ol/tilegrid/TileGrid";
 import { Circle as CircleStyle, Fill, Stroke, Style } from "ol/style";
 import type { FeatureLike } from "ol/Feature";
 import type Feature from "ol/Feature";
@@ -42,13 +46,32 @@ function apiBron(pad: string, extra = ""): VectorSource {
   return bron;
 }
 
-const panden = new VectorLayer({
-  source: apiBron("/api/panden/"),
-  style: new Style({
-    fill: new Fill({ color: "rgba(214, 90, 40, 0.35)" }),
-    stroke: new Stroke({ color: "#a33d12", width: 1 }),
-  }),
+const pandStijl = new Style({
+  fill: new Fill({ color: "rgba(214, 90, 40, 0.35)" }),
+  stroke: new Stroke({ color: "#a33d12", width: 1 }),
 });
+
+// Les 16: ?panden=tiles -> vector tiles (MVT) uit /tiles/panden/{z}/{x}/{y}.pbf in plaats van GeoJSON.
+// Het tegelgrid is hetzelfde PDOK-grid als de achtergrondkaart (rd.ts): zelfde origin en resoluties,
+// 256 px; dan is OpenLayers-zoom z gelijk aan tegelniveau z op de server (ST_TileEnvelope met bounds).
+const TILES = new URLSearchParams(location.search).get("panden") === "tiles";
+function pandenTegels(): VectorTileLayer {
+  return new VectorTileLayer({
+    source: new VectorTileSource({
+      format: new MVT(),
+      projection: RD,
+      tileGrid: new TileGrid({ origin: [-285401.92, 903401.92], resolutions: RESOLUTIONS, tileSize: 256 }),
+      url: "/tiles/panden/{z}/{x}/{y}.pbf",
+      maxZoom: 14,
+    }),
+    style: pandStijl,
+    declutter: false,
+  });
+}
+
+const panden = TILES
+  ? pandenTegels()
+  : new VectorLayer({ source: apiBron("/api/panden/"), style: pandStijl });
 // Zelf les 14: buurtlaag onder de panden; een klik buiten een pand toont de buurtnaam
 const buurten = new VectorLayer({
   source: apiBron("/api/buurten/"),

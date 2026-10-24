@@ -75,6 +75,9 @@ class Pand(models.Model):
     oppervlakte_max = models.IntegerField(null=True, blank=True)
     aantal_verblijfsobjecten = models.IntegerField()
     geom = models.MultiPolygonField(srid=28992)
+    # Les 11: dezelfde ligging in WGS84, eenmaal als geometry en eenmaal als geography.
+    midden_wgs = models.PointField(srid=4326, null=True, blank=True)
+    midden_geo = models.PointField(srid=4326, geography=True, null=True, blank=True)
 
     class Meta:
         ordering = ["gid"]

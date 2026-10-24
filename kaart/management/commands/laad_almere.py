@@ -1,3 +1,6 @@
+from io import StringIO
+
+from django.core.management import call_command
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
@@ -27,6 +30,7 @@ class Command(BaseCommand):
             # LayerMapping kan niet filteren: laden en daarna de oudere panden verwijderen.
             verwijderd, _ = Pand.objects.filter(bouwjaar__lt=vanaf).delete()
             self.stdout.write(f"Verwijderd (bouwjaar < {vanaf}): {verwijderd}")
+        call_command("vul_midden", stdout=StringIO())
         self.stdout.write(f"Bron: {GPKG.name}")
         self.stdout.write(f"Buurten: {Buurt.objects.count()}")
         self.stdout.write(f"Panden:  {Pand.objects.count()}")

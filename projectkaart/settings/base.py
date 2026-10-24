@@ -92,6 +92,11 @@ DATABASES = {
     }
 }
 
+# Les 16: cache voor vector tiles. LocMem is per proces; genoeg voor het lab (productie: Redis).
+CACHES = {
+    "default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache", "LOCATION": "tiles"}
+}
+
 # Alleen nodig als GDAL/GEOS op een ongebruikelijke plek staan (les 09).
 if os.environ.get("GDAL_LIBRARY_PATH"):
     GDAL_LIBRARY_PATH = os.environ["GDAL_LIBRARY_PATH"]

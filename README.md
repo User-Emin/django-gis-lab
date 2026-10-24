@@ -19,6 +19,7 @@ Elke les heeft een tag: `git checkout les-NN`.
 | les-19 | Georeferentie en kwaliteit: paspunten, affien vs Helmert (`georefereer`), `ST_Affine`, `geom_rd` in RD op PDOK, `controleer_tekening` (ST_IsValid, ST_MakeValid, overlap, pand-verschil, EXPLAIN) |
 | les-20 | Terug naar CAD: `exporteer_dxf` (GIS naar DXF met RCS-laagnamen, inverse georef, `$INSUNITS`), rondreis, `ogr2ogr -f DXF` ter vergelijking, DWG (CAD-driver alleen lezen) |
 | les-21 | AutoCAD automatiseren: `autocad/` met RCS-laagcontrole in LISP, `.scr`, .NET (niet gecompileerd), COM (alleen Windows) en Python/ezdxf (shapely: overlap, is_valid), bulge-oppervlakte |
+| les-22 | AutoCAD in de pipeline: `pipeline/` (accoreconsole-batch, APS Design Automation-client met respx-tests, Django-schets), `cad/opslag.py`, Celery + Redis (poort 6390) met `cad.rcs_check` en een taakstatuspagina |
 
 Starten: `cp .env.example .env`, `uv sync`, `uv run python manage.py runserver 127.0.0.1:8700`.
 Database: PostgreSQL op 127.0.0.1:5433, database `djangolab`.

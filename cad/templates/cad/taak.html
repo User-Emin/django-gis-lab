@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Taak {{ taak.id }}{% endblock %}
+{% block content %}
+<h1>Taakstatus</h1>
+<p>Taak <code>{{ taak.id }}</code>: <strong>{{ taak.status }}</strong></p>
+{% if taak.resultaat %}
+<p>{{ taak.resultaat.bestand }}: {{ taak.resultaat.aantal_bevindingen }} bevinding{{ taak.resultaat.aantal_bevindingen|pluralize:"en" }}, {{ taak.resultaat.ruimten }} ruimten.</p>
+<ul>{% for b in taak.resultaat.bevindingen %}<li>{{ b }}</li>{% endfor %}</ul>
+{% endif %}
+{% if taak.fout %}<p>Fout: {{ taak.fout }}</p>{% endif %}
+{% endblock %}

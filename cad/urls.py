@@ -7,6 +7,7 @@ app_name = "cad"
 urlpatterns = [
     path("upload/", views.upload, name="upload"),
     path("tekening/<int:pk>/", views.tekening, name="tekening"),
+    path("taak/<str:taak_id>/", views.taak_status, name="taak"),
     path("api/tekening/<int:pk>/ruimtes/", views.ruimtes_geojson, name="ruimtes"),
     path("api/tekening/<int:pk>/fouten/", views.fouten_geojson, name="fouten"),
 ]

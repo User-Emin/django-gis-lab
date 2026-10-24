@@ -154,3 +154,18 @@ def fouten_geojson(request, pk):
             "features": features,
         }
     )
+
+
+def taak_status(request, taak_id):
+    """Status van een Celery-taak als HTML, of JSON met ``?format=json``."""
+    from celery.result import AsyncResult
+
+    res = AsyncResult(taak_id)
+    data = {"id": taak_id, "status": res.status}
+    if res.successful():
+        data["resultaat"] = res.result
+    elif res.failed():
+        data["fout"] = str(res.result)
+    if request.GET.get("format") == "json":
+        return JsonResponse(data)
+    return render(request, "cad/taak.html", {"taak": data})

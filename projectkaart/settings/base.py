@@ -151,3 +151,11 @@ SPECTACULAR_SETTINGS = {
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
 }
+
+# Les 22: Celery met een EIGEN Redis op 6390 (6379 is van een andere toepassing).
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://127.0.0.1:6390/0")
+CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", "redis://127.0.0.1:6390/1")
+# Design Automation (les 22): nickname van de APS-app; APS_CLIENT_ID/SECRET alleen uit de omgeving.
+APS_NICKNAME = os.environ.get("APS_NICKNAME", "")
+# Basis-URL waarmee DA bestanden kan ophalen (signed URLs, cad.opslag); leeg = alleen relatief.
+CAD_PUBLIC_BASE_URL = os.environ.get("CAD_PUBLIC_BASE_URL", "")

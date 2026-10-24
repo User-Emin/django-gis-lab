@@ -40,3 +40,45 @@ class Tekening(models.Model):
 
     def __str__(self) -> str:
         return f"{self.naam} v{self.versie}"
+
+
+# Les 10: gegenereerd met `ogrinspect`, daarna met de hand aangepast
+# (max_length=0 -> echte lengtes, NULL toegestaan waar de bron NULL heeft).
+class Buurt(models.Model):
+    gid = models.IntegerField(unique=True)
+    buurtcode = models.CharField(max_length=10)
+    buurtnaam = models.CharField(max_length=60)
+    wijkcode = models.CharField(max_length=8)
+    gemeentecode = models.CharField(max_length=6)
+    gemeentenaam = models.CharField(max_length=40)
+    aantalinwoners = models.IntegerField()
+    dichtheid = models.IntegerField()
+    landha = models.IntegerField()
+    jaar = models.IntegerField()
+    geom = models.MultiPolygonField(srid=28992)
+
+    class Meta:
+        ordering = ["buurtnaam"]
+        verbose_name_plural = "buurten"
+
+    def __str__(self) -> str:
+        return self.buurtnaam
+
+
+class Pand(models.Model):
+    gid = models.IntegerField(unique=True)
+    identificatie = models.CharField(max_length=16)
+    bouwjaar = models.IntegerField()
+    status = models.CharField(max_length=40)
+    gebruiksdoel = models.CharField(max_length=200, null=True, blank=True)
+    oppervlakte_min = models.IntegerField(null=True, blank=True)
+    oppervlakte_max = models.IntegerField(null=True, blank=True)
+    aantal_verblijfsobjecten = models.IntegerField()
+    geom = models.MultiPolygonField(srid=28992)
+
+    class Meta:
+        ordering = ["gid"]
+        verbose_name_plural = "panden"
+
+    def __str__(self) -> str:
+        return self.identificatie

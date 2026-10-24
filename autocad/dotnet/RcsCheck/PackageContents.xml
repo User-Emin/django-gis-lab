@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- ⚠️ Niet getest. Voor RcsCheck.bundle\PackageContents.xml met de DLL in RcsCheck.bundle\Contents\Win64\.
+     Patroon: dotnet-outputs/FlangeDA/PackageContents.xml in aps-lisp-dotnet-skill (gezien 24-10-2026).
+     SeriesMin/Max R25.0 = AutoCAD 2025 (SKILL.md-tabel); voor 2026: R25.1. Hergebruik in les 22 (DA AppBundle). -->
+<ApplicationPackage SchemaVersion="1.0"
+  AutodeskProduct="AutoCAD"
+  ProductType="Application"
+  AppVersion="1.0.0"
+  ProductCode="{6F1D2B9A-3C4E-4F5A-8B7C-21A0E5D9C421}"
+  Name="RcsCheck"
+  Description="RCS-laagcontrole en ruimtelijst (oefening les 21)"
+  Author="Django-GIS-kennisbank (oefening)">
+  <RuntimeRequirements OS="Win64" Platform="AutoCAD*" SeriesMin="R25.0" SeriesMax="R25.0" />
+  <Components Description="RcsCheck">
+    <RuntimeRequirements OS="Win64" Platform="AutoCAD*" SeriesMin="R25.0" SeriesMax="R25.0" SupportPath="./Contents/Win64" />
+    <ComponentEntry
+      AppName="RcsCheck"
+      AppType=".NET"
+      Version="1.0.0"
+      ModuleName="./Contents/Win64/RcsCheck.dll"
+      LoadOnAutoCADStartup="True">
+      <Commands GroupName="RcsCheck_Commands">
+        <Command Local="RCSCHECK" Global="RCSCHECK" />
+      </Commands>
+    </ComponentEntry>
+  </Components>
+</ApplicationPackage>

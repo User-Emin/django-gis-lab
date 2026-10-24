@@ -1,0 +1,26 @@
+; rcs-check.scr -- laadt rcs-check.lsp en draait RCSCHECK op de geopende tekening.
+; ⚠️ niet in AutoCAD uitgevoerd.
+; Desktop: SCRIPT-commando. Zonder scherm (les 22):
+;   accoreconsole.exe /i "C:\abs\pad\plattegrond-bg.dwg" /s "C:\abs\pad\rcs-check.scr"
+; Alle paden absoluut: accoreconsole is een apart proces (aps-lisp-dotnet-skill SKILL.md, gezien 24-10-2026).
+;
+; Wanneer .scr en wanneer LISP?
+;  .scr = letterlijk wat je op de commandoregel typt, regel voor regel: geen variabelen, geen if/lus.
+;        Goed om een vaste reeks commando's (instellingen, laden, opslaan, afsluiten) over veel
+;        tekeningen te herhalen, en de enige manier om accoreconsole te sturen (/s).
+;  LISP = echte logica (lussen, voorwaarden, entget, bestanden schrijven). De controle zelf hoort
+;        in LISP (of .NET); de .scr laadt alleen en roept aan. Een .lsp kan niet direct met /s.
+;
+; Let op: in een .scr is een spatie of regeleinde "Enter". Geen lege regels tussen de stappen.
+;
+; WAARSCHUWING SECURELOAD 0: zet de beveiliging uit die controleert of code uit een vertrouwde map
+; komt. Alleen in een afgeschermde batch-omgeving met eigen, gecontroleerde code. Beter: zet de
+; map met rcs-check.lsp in TRUSTEDPATHS en laat SECURELOAD op 1.
+FILEDIA
+0
+SECURELOAD
+0
+(load "C:/RVB/automatisering/lisp/rcs-check.lsp")
+RCSCHECK
+QUIT
+Y

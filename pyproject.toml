@@ -22,6 +22,7 @@ dev = [
     "pytest-cov>=7.1.0",
     "pytest-django>=4.14.0",
     "ruff>=0.17.2",
+    "shapely>=2.2.0",
 ]
 
 [tool.ruff]
@@ -46,3 +47,7 @@ omit = ["*/migrations/*", "*/tests/*", "kaart/management/*"]
 
 [tool.coverage.report]
 show_missing = true
+
+[tool.ruff.lint.per-file-ignores]
+# autocad/: lessen-scripts met lange docstrings/uitvoerregels; regels worden daar bewust niet afgebroken
+"autocad/**" = ["E501"]

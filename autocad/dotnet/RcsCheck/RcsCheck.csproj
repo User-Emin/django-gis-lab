@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- ⚠️ Niet gecompileerd op deze Mac (geen dotnet). Patroon: FlangeDA.csproj in
+       github.com/autodesk-platform-services/aps-lisp-dotnet-skill (gezien 24-10-2026).
+       AutoCAD 2025 = 25.0.0 / net8.0-windows; AutoCAD 2026 = 25.1.0 / net8.0-windows (SKILL.md-tabel). -->
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <PlatformTarget>x64</PlatformTarget>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Core (AcCoreMgd.dll) + Model (AcDbMgd.dll), NIET AutoCAD.NET (AcMgd.dll, desktop-UI):
+         dat laat accoreconsole en Design Automation crashen (0xC0000005). Core 25.0.0 hangt zelf al af
+         van Model [25.0.0] (nuspec); Model staat er expliciet bij voor de leesbaarheid.
+         ExcludeAssets=runtime: AutoCAD levert de DLL's zelf bij het laden. -->
+    <PackageReference Include="AutoCAD.NET.Core" Version="25.0.0" ExcludeAssets="runtime" />
+    <PackageReference Include="AutoCAD.NET.Model" Version="25.0.0" ExcludeAssets="runtime" />
+  </ItemGroup>
+</Project>

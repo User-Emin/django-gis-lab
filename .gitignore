@@ -10,3 +10,4 @@ htmlcov/
 staticfiles/
 _shots/
 _manifests/
+.coverage

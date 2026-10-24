@@ -51,7 +51,8 @@ class ProjectLijst(ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        return Project.objects.annotate(aantal=Count("tekeningen"))
+        # annotate (GROUP BY) negeert Meta.ordering: zelf sorteren, anders waarschuwt paginering
+        return Project.objects.annotate(aantal=Count("tekeningen")).order_by("naam")
 
 
 class ProjectDetail(DetailView):

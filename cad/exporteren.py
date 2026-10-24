@@ -96,8 +96,10 @@ def _laag(doc: Drawing, naam: str, kleur: int) -> str:
     return naam
 
 
-def exporteer(tekening: Tekening, crs: str = "rd", pand_id: str = "") -> tuple[Drawing, dict]:
-    """Bouw het DXF-document; geef (doc, rapport)."""
+def exporteer(
+    tekening: Tekening, crs: str = "rd", pand_id: str = "", controle: bool = True
+) -> tuple[Drawing, dict]:
+    """Bouw het DXF-document; geef (doc, rapport). Met controle=False geen laag "00 Controle"."""
     st = Stelsel(tekening, crs)
     ruimtes = list(tekening.ruimtes.exclude(geom_rd__isnull=True))
     if not ruimtes:
@@ -140,32 +142,34 @@ def exporteer(tekening: Tekening, crs: str = "rd", pand_id: str = "") -> tuple[D
     for g in kwaliteit.geldigheid(tekening.pk):
         if not g["geldig"]:
             r = next(r for r in ruimtes if r.pk == g["id"])
+            if controle:
+                laag = _laag(doc, LAAG_CONTROLE, ROOD)
+                msp.add_lwpolyline(
+                    st.ring(r.geom_rd[0]), close=True, dxfattribs={"layer": laag, "color": ROOD}
+                )
+                c = r.geom_rd.envelope.centroid
+                x, y = st.punt(c.x, c.y)
+                msp.add_text(
+                    f"ONGELDIG {g['nummer']}: {g['reden'].split('[')[0]}",
+                    height=0.3 * h,
+                    dxfattribs={"layer": laag, "color": ROOD, "insert": (x, y)},
+                )
+            fouten["ongeldig"].append(g["nummer"])
+    for o in kwaliteit.overlap_geometrie(tekening.pk):
+        if controle:
             laag = _laag(doc, LAAG_CONTROLE, ROOD)
-            msp.add_lwpolyline(
-                st.ring(r.geom_rd[0]), close=True, dxfattribs={"layer": laag, "color": ROOD}
-            )
-            c = r.geom_rd.envelope.centroid
+            geom = GEOSGeometry(o["geojson"], srid=28992)
+            for poly in _polygonen(geom):
+                msp.add_lwpolyline(
+                    st.ring(poly[0]), close=True, dxfattribs={"layer": laag, "color": ROOD}
+                )
+            c = geom.centroid
             x, y = st.punt(c.x, c.y)
             msp.add_text(
-                f"ONGELDIG {g['nummer']}: {g['reden'].split('[')[0]}",
+                f"OVERLAP {o['a']}/{o['b']} {o['oppervlakte']:.2f} m2",
                 height=0.3 * h,
                 dxfattribs={"layer": laag, "color": ROOD, "insert": (x, y)},
             )
-            fouten["ongeldig"].append(g["nummer"])
-    for o in kwaliteit.overlap_geometrie(tekening.pk):
-        laag = _laag(doc, LAAG_CONTROLE, ROOD)
-        geom = GEOSGeometry(o["geojson"], srid=28992)
-        for poly in _polygonen(geom):
-            msp.add_lwpolyline(
-                st.ring(poly[0]), close=True, dxfattribs={"layer": laag, "color": ROOD}
-            )
-        c = geom.centroid
-        x, y = st.punt(c.x, c.y)
-        msp.add_text(
-            f"OVERLAP {o['a']}/{o['b']} {o['oppervlakte']:.2f} m2",
-            height=0.3 * h,
-            dxfattribs={"layer": laag, "color": ROOD, "insert": (x, y)},
-        )
         fouten["overlap"].append([o["a"], o["b"], round(o["oppervlakte"], 3)])
     rapport["fouten"] = fouten
 

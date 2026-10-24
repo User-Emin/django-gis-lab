@@ -160,6 +160,16 @@ def test_fouten_export_heeft_laag_00_controle(fouten, tmp_path):
     assert soorten == ["LWPOLYLINE", "LWPOLYLINE", "TEXT", "TEXT"]
 
 
+def test_zonder_controle_laat_controlelaag_weg(fouten, tmp_path):
+    doc, rapport = exporteren.exporteer(fouten, "rd", controle=False)
+    pad = tmp_path / "zc.dxf"
+    doc.saveas(pad)
+    doc = ezdxf.readfile(pad)
+    assert "00 Controle" not in {laag.dxf.name for laag in doc.layers}
+    assert len(_polylijnen(doc, "92 Rust- en werkgebieden")) == 9
+    assert rapport["fouten"]["ongeldig"] == ["00.06"]  # de fouten worden wel gemeld
+
+
 def test_export_zonder_georef_geeft_fout(db, pand):
     t = _tekening("plattegrond-bg.dxf", georefereer=False)
     with pytest.raises(exporteren.ExportFout):

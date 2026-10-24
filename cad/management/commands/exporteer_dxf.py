@@ -22,9 +22,12 @@ class Command(BaseCommand):
         parser.add_argument("tekening_id", type=int)
         parser.add_argument("uit", type=Path)
         parser.add_argument("--crs", choices=["rd", "lokaal"], default="rd")
+        parser.add_argument(
+            "--zonder-controle", action="store_true", help='laat laag "00 Controle" weg'
+        )
         parser.add_argument("--origineel", type=Path, help="oorspronkelijke DXF voor de rondreis")
 
-    def handle(self, *args, tekening_id, uit, crs, origineel, **opties):
+    def handle(self, *args, tekening_id, uit, crs, origineel, zonder_controle, **opties):
         try:
             t = Tekening.objects.get(pk=tekening_id)
         except Tekening.DoesNotExist:
@@ -32,7 +35,7 @@ class Command(BaseCommand):
         logging.getLogger("ezdxf").setLevel(logging.WARNING)
         w = self.stdout.write
         try:
-            doc, rapport = exporteren.exporteer(t, crs)
+            doc, rapport = exporteren.exporteer(t, crs, controle=not zonder_controle)
         except exporteren.ExportFout as fout:
             raise CommandError(str(fout)) from fout
         doc.saveas(uit)

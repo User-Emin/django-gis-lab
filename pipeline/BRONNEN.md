@@ -21,3 +21,17 @@
 | DA-prijs | ⚠️ onbevestigd (feiten-rvb-autocad B) |
 | Celery `shared_task`, `delay_on_commit` | https://docs.celeryq.dev/en/stable/django/first-steps-with-django.html (via feiten-tech §6) |
 | Officiële APS-API-referentie (aps.autodesk.com) | ⚠️ niet geopend: JS-pagina's, alleen GitHub-bronnen gebruikt |
+
+## Niet meegeleverde bronkopieën (`pipeline/bron/`)
+
+Elf bestanden uit https://github.com/autodesk-platform-services/aps-lisp-dotnet-skill/tree/23e88934d1661116683e39a4041318a9e9d80c03 zijn niet meegeleverd: geen licentie in de bronrepo (gh api license=null, 24-10-2026), daarom niet meegeleverd. Lees ze op de gepinde commit; er is bewust geen downloadscript.
+
+Oorspronkelijke paden in die repo, met de bestandsnaam waaronder ze lokaal gelezen zijn:
+- `SPEC.md`, `CLAUDE.md`, `README.md` (lispskill-SPEC.md, -CLAUDE.md, -README.md)
+- `skill/SKILL.md` (lispskill-skill_SKILL.md)
+- `dotnet-outputs/FlangeDA/da/APS-Common.ps1` (flange-APS-Common.ps1)
+- `dotnet-outputs/FlangeDA/da/Deploy-And-Test-DA.ps1` (flange-Deploy-And-Test-DA.ps1)
+- `dotnet-outputs/FlangeDA/Tests/Integration/RunIntegrationTests.ps1` (flange-RunIntegrationTests.ps1)
+- `dotnet-outputs/FlangeDA/` (flange-.env.example, flange-TestRunner.scr, flange-activity.json, flange-aps-client.js; exacte subpaden: zie de gepinde tree)
+
+Wel meegeleverd: `dadotnet-DesignAutomationController.cs` (MIT) en `sdk-*.gen.cs` (Apache-2.0); zie `THIRD_PARTY.md`.

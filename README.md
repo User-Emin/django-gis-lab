@@ -1,7 +1,22 @@
 # django-gis-lab: Projectkaart
 
-Oefenproject bij de Django-GIS-kennisbank: een app voor ontwerptekeningen (DXF) van een herinrichting in Almere.
-Elke les heeft een tag: `git checkout les-NN`.
+Praktijklab bij de Django-GIS-kennisbank (lessen over Django, PostGIS, OpenLayers en AutoCAD/DXF in een GIS-pipeline). Het is een werkende app voor ontwerptekeningen (DXF) van een herinrichting in Almere. Elke les in de kennisbank heeft een tag in deze repo: `git checkout les-NN`.
+
+**Alleen open data.** BAG-panden (PDOK, CC0) en CBS-buurten (CC BY 4.0), plus een zelf gegenereerde, fictieve plattegrond. Geen echte tekeningen van derden, geen credentials. Zie `THIRD_PARTY.md` voor herkomst en licenties; code staat onder de MIT-licentie (`LICENSE`).
+
+## Draaien
+
+Nodig: [uv](https://docs.astral.sh/uv/), PostgreSQL met PostGIS op poort 5433 (database `djangolab`), Redis op poort 6390 (alleen voor Celery, les 22), GDAL/GEOS op het systeem.
+
+```
+cp .env.example .env     # eigen waarden invullen; .env staat in .gitignore
+uv sync
+uv run python manage.py migrate
+uv run python manage.py runserver 127.0.0.1:8700
+set -a; . ./.env; set +a; uv run pytest -q
+```
+
+Meewerken: zie `CONTRIBUTING.md`.
 
 | Tag | Stand |
 |---|---|
@@ -21,5 +36,4 @@ Elke les heeft een tag: `git checkout les-NN`.
 | les-21 | AutoCAD automatiseren: `autocad/` met RCS-laagcontrole in LISP, `.scr`, .NET (niet gecompileerd), COM (alleen Windows) en Python/ezdxf (shapely: overlap, is_valid), bulge-oppervlakte |
 | les-22 | AutoCAD in de pipeline: `pipeline/` (accoreconsole-batch, APS Design Automation-client met respx-tests, Django-schets), `cad/opslag.py`, Celery + Redis (poort 6390) met `cad.rcs_check` en een taakstatuspagina |
 
-Starten: `cp .env.example .env`, `uv sync`, `uv run python manage.py runserver 127.0.0.1:8700`.
 Database: PostgreSQL op 127.0.0.1:5433, database `djangolab`.

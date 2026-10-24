@@ -1,4 +1,4 @@
-# Les 25: web + postgis + redis. Alleen voorbeeldwaarden als default; het echte wachtwoord komt uit
+# Les 25: web + postgis + redis (les 27: + worker). Alleen voorbeeldwaarden als default; het echte wachtwoord komt uit
 # .env (niet in de repo). Alleen "web" publiceert een poort; db en redis blijven in het compose-netwerk.
 name: django-lab
 
@@ -49,6 +49,23 @@ services:
     environment: *app-env
     ports:
       - "${WEB_PORT:-8000}:8000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+
+  # Les 27: Celery-worker voor zware DXF-imports en rcs_check; geen poort, alleen via redis en db.
+  worker:
+    image: django-lab:compose
+    command: ["celery", "-A", "projectkaart", "worker", "-l", "info", "--concurrency", "2"]
+    environment: *app-env
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A projectkaart inspect ping -d celery@$$HOSTNAME"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
     depends_on:
       migrate:
         condition: service_completed_successfully

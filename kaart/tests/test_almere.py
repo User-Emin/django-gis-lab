@@ -27,3 +27,13 @@ def test_geometrie_in_rd_new_en_geldig(almere):
 def test_punt_in_centrum_ligt_in_een_buurt(almere):
     punt = Point(143550, 486850, srid=28992)
     assert Buurt.objects.filter(geom__contains=punt).count() == 1
+
+
+@pytest.mark.django_db
+def test_laad_almere_vanaf_bouwjaar():
+    uit = StringIO()
+    call_command("laad_almere", "--vanaf-bouwjaar=2000", stdout=uit)
+    assert Pand.objects.count() > 0
+    assert Pand.objects.count() < 5726
+    assert not Pand.objects.filter(bouwjaar__lt=2000).exists()
+    assert "Verwijderd (bouwjaar < 2000)" in uit.getvalue()

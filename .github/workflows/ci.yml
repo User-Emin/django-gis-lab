@@ -88,3 +88,79 @@ jobs:
           dotnet-version: "8.0.x"
       - name: dotnet build RcsCheck (NuGet-referenties AutoCAD.NET.Core/Model)
         run: dotnet build autocad/dotnet/RcsCheck -c Release
+
+  docker:
+    name: docker
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgis:
+        image: postgis/postgis:17-3.6
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci-only-dummy-password
+          POSTGRES_DB: ci_gis
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Image bouwen (multi-stage, cache in GitHub Actions)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          tags: django-lab:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Grootte en lagen
+        run: |
+          docker image ls django-lab:ci
+          echo "Grootte in bytes: $(docker image inspect django-lab:ci --format '{{.Size}}')"
+          echo "Aantal lagen: $(docker image inspect django-lab:ci --format '{{len .RootFS.Layers}}')"
+          docker history django-lab:ci
+
+      - name: Versies in de image (GDAL, GEOS, Python, gebruiker)
+        run: |
+          docker run --rm --entrypoint python django-lab:ci -c "import sys; print('python', sys.version.split()[0])"
+          docker run --rm --entrypoint id django-lab:ci
+          docker run --rm -e DJANGO_SECRET_KEY=ci-dummy -e DJANGO_ALLOWED_HOSTS=localhost --entrypoint python django-lab:ci manage.py shell -c "from django.contrib.gis import gdal, geos; print('GDAL', gdal.gdal_version().decode()); print('GEOS', geos.geos_version().decode())"
+
+      - name: Rooktest, migrate en gunicorn tegen de PostGIS-service
+        env:
+          DB_ENV: >-
+            -e DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+            -e DB_NAME=ci_gis -e DB_HOST=127.0.0.1 -e DB_PORT=5432 -e DB_USER=postgres
+            -e DB_PASSWORD=ci-only-dummy-password
+        run: |
+          SECRET="$(python3 -c 'import secrets; print(secrets.token_urlsafe(50))')"
+          docker run --rm --network host $DB_ENV -e DJANGO_SECRET_KEY="$SECRET" django-lab:ci python manage.py migrate --noinput | tail -5
+          docker run -d --name web --network host $DB_ENV -e DJANGO_SECRET_KEY="$SECRET" django-lab:ci
+          for i in $(seq 1 30); do
+            code="$(curl -s -o /dev/null -w '%{http_code}' -H 'X-Forwarded-Proto: https' http://127.0.0.1:8000/health || true)"
+            echo "poging $i: /health -> $code"
+            [ "$code" = "200" ] && break
+            sleep 2
+          done
+          curl -s -H 'X-Forwarded-Proto: https' http://127.0.0.1:8000/health; echo
+          echo "statisch (whitenoise): $(curl -s -o /dev/null -w '%{http_code}' -H 'X-Forwarded-Proto: https' http://127.0.0.1:8000/static/admin/css/base.css)"
+          for i in $(seq 1 20); do
+            status="$(docker inspect --format '{{.State.Health.Status}}' web)"
+            echo "healthcheck-status: $status"
+            [ "$status" = "healthy" ] && break
+            sleep 5
+          done
+          docker logs web | tail -15
+          [ "$code" = "200" ] && [ "$status" = "healthy" ]
+
+      - name: docker compose config
+        run: docker compose config -q && echo "compose.yaml is geldig"

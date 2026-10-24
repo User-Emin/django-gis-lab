@@ -1,0 +1,59 @@
+# Les 25: web + postgis + redis. Alleen voorbeeldwaarden als default; het echte wachtwoord komt uit
+# .env (niet in de repo). Alleen "web" publiceert een poort; db en redis blijven in het compose-netwerk.
+name: django-lab
+
+services:
+  db:
+    image: postgis/postgis:17-3.6
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-voorbeeld-wachtwoord}
+      POSTGRES_DB: ${DB_NAME:-djangolab}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-djangolab}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7.4.8-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  migrate:
+    build: .
+    image: django-lab:compose
+    command: ["python", "manage.py", "migrate", "--noinput"]
+    environment: &app-env
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-voorbeeld-niet-voor-productie}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+      DJANGO_SSL_REDIRECT: ${DJANGO_SSL_REDIRECT:-0}
+      DB_NAME: ${DB_NAME:-djangolab}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-voorbeeld-wachtwoord}
+      DB_HOST: db
+      DB_PORT: "5432"
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    image: django-lab:compose
+    environment: *app-env
+    ports:
+      - "${WEB_PORT:-8000}:8000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+
+volumes:
+  pgdata:

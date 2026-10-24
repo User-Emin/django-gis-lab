@@ -4,10 +4,24 @@ from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema
 from rest_framework import viewsets
 from rest_framework.exceptions import ParseError
 from rest_framework_gis.fields import GeometryField
-from rest_framework_gis.filters import InBBoxFilter
+from rest_framework_gis.filters import (
+    DistanceToPointFilter,
+    DistanceToPointOrderingFilter,
+    InBBoxFilter,
+)
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 
 from .models import Buurt, Pand, Project
+
+
+class SchemaOrderingFilter(DistanceToPointOrderingFilter):
+    """drf-gis 1.x zet in het schema `"type": "enum"`, wat geen geldig OpenAPI-type is."""
+
+    def get_schema_operation_parameters(self, view):
+        params = super().get_schema_operation_parameters(view)
+        params[-1]["schema"] = {"type": "string", "enum": ["asc", "desc"], "example": "asc"}
+        return params
+
 
 TOEGESTANE_SRID = {4326: "WGS84 (graden, GeoJSON-standaard)", 28992: "RD New (meters)"}
 
@@ -121,7 +135,18 @@ class PandViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Pand.objects.all()
     serializer_class = PandSerializer
     bbox_filter_field = "geom"
-    filter_backends = [SridBBoxFilter, df.DjangoFilterBackend]
+    # Zelf les 13: ?point=lon,lat&dist=250 (meters, want midden_geo is geography) en &order=asc|desc
+    distance_filter_field = "midden_geo"
+    distance_filter_convert_meters = (
+        False  # True zou meters naar graden omrekenen: fout op geography
+    )
+    distance_ordering_filter_field = "midden_geo"
+    filter_backends = [
+        SridBBoxFilter,
+        df.DjangoFilterBackend,
+        DistanceToPointFilter,
+        SchemaOrderingFilter,
+    ]
     filterset_class = PandFilter
 
 

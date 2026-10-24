@@ -82,3 +82,24 @@ def test_schema_valide(client):
     from django.core.management import call_command
 
     call_command("spectacular", "--validate", "--fail-on-warn", file="/dev/null")
+
+
+def ids(antwoord):
+    return [f["properties"]["identificatie"].lstrip("0") for f in antwoord["features"]]
+
+
+def test_afstandsfilter_op_punt(client, panden):
+    # Pand 1 (143010..143030, 486010..486030) in WGS84-midden; punt = midden van pand 1.
+    for p in panden:
+        p.refresh_from_db()
+    from django.core.management import call_command
+
+    call_command("vul_midden")
+    midden = Pand.objects.get(gid=1).midden_geo
+    punt = f"{midden.x},{midden.y}"
+    dichtbij = client.get(f"/api/panden/?point={punt}&dist=50").json()
+    assert ids(dichtbij) == ["1"]
+    ver = client.get(f"/api/panden/?point={punt}&dist=1000&order=asc").json()
+    assert ids(ver) == ["1", "2"]
+    omgekeerd = client.get(f"/api/panden/?point={punt}&dist=1000&order=desc").json()
+    assert ids(omgekeerd) == ["2", "1"]

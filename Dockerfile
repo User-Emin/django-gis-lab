@@ -42,7 +42,8 @@ COPY --from=frontend /src/kaart/static/app ./kaart/static/app
 # collectstatic met alleen dummy build-waarden; die blijven niet in de image (ENV staat in dit RUN).
 RUN DJANGO_SECRET_KEY=alleen-voor-de-build DJANGO_ALLOWED_HOSTS=build.invalid \
     python manage.py collectstatic --noinput \
-    && chown -R app:app /app/staticfiles
+    && chown -R app:app /app/staticfiles \
+    && chown app:app /app
 USER app
 EXPOSE 8000
 # Achter een proxy is SECURE_SSL_REDIRECT aan; de healthcheck stuurt daarom X-Forwarded-Proto.

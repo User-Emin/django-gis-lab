@@ -11,3 +11,5 @@ staticfiles/
 _shots/
 _manifests/
 .coverage
+node_modules/
+frontend/dist/

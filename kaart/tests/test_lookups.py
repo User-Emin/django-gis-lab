@@ -35,3 +35,14 @@ def test_distance_sortering_nul_voor_pand_onder_punt(almere):
 
 def test_buurt_bevat_punt(almere):
     assert Buurt.objects.get(geom__contains=PUNT).buurtnaam == "Centrum Stad Zuidoost"
+
+
+def test_dichtstbij_vanaf_2000_gesorteerd(almere):
+    from kaart.management.commands.dichtstbij import dichtstbij
+
+    res = list(dichtstbij(PUNT, 2000, 10))
+    assert len(res) == 10
+    assert all(p.bouwjaar >= 2000 for p in res)
+    afstanden = [p.d.m for p in res]
+    assert afstanden == sorted(afstanden)
+    assert afstanden[0] < 1  # het pand onder het punt (bouwjaar >= 2000 in de les)

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Projecten</h1>
+<p><a href="{% url 'kaart:project_nieuw' %}">Nieuw project</a></p>
+<table>
+  <thead><tr><th>Project</th><th>Opdrachtgever</th><th>Status</th><th>Tekeningen</th></tr></thead>
+  <tbody>{% for p in object_list %}
+    <tr><td><a href="{% url 'kaart:project_detail' p.pk %}">{{ p.naam }}</a></td><td>{{ p.opdrachtgever }}</td><td>{{ p.get_status_display }}</td><td>{{ p.aantal }}</td></tr>
+  {% empty %}<tr><td colspan="4">Nog geen projecten.</td></tr>{% endfor %}</tbody>
+</table>
+{% if is_paginated %}<p>Pagina {{ page_obj.number }} van {{ paginator.num_pages }}
+  {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}">vorige</a>{% endif %}
+  {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}">volgende</a>{% endif %}</p>{% endif %}
+{% endblock %}

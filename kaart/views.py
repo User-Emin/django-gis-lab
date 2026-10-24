@@ -1,6 +1,9 @@
 from django.db.models import Count
 from django.shortcuts import render
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, DetailView, ListView, UpdateView
 
+from .forms import ProjectForm
 from .models import Project, Tekening
 
 
@@ -39,3 +42,34 @@ def projecten_overzicht(request):
     """Les 06, Zelf: tekeningen per project tellen met één query (annotate), niet per project."""
     projecten = Project.objects.annotate(aantal=Count("tekeningen"))
     return render(request, "kaart/project_overzicht.html", {"projecten": projecten})
+
+
+class ProjectLijst(ListView):
+    """Les 07: klassegebaseerde lijstview. Standaard template: kaart/project_list.html."""
+
+    model = Project
+    paginate_by = 10
+
+    def get_queryset(self):
+        return Project.objects.annotate(aantal=Count("tekeningen"))
+
+
+class ProjectDetail(DetailView):
+    model = Project
+
+    def get_queryset(self):
+        return Project.objects.prefetch_related("tekeningen")
+
+
+class ProjectNieuw(CreateView):
+    model = Project
+    form_class = ProjectForm
+    success_url = reverse_lazy("kaart:project_lijst")
+
+
+class ProjectBewerk(UpdateView):
+    """Les 07, Zelf: bewerken met hetzelfde formulier (template project_form.html)."""
+
+    model = Project
+    form_class = ProjectForm
+    success_url = reverse_lazy("kaart:project_lijst")

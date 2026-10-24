@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}{{ object.naam }}{% endblock %}
+{% block content %}
+<h1>{{ object.naam }}</h1>
+<p>Opdrachtgever: {{ object.opdrachtgever }} &middot; Status: {{ object.get_status_display }}</p>
+<h2>Tekeningen</h2>
+<ul>{% for t in object.tekeningen.all %}<li>{{ t }} ({{ t.bestandsnaam }})</li>{% empty %}<li>Geen tekeningen.</li>{% endfor %}</ul>
+<p><a href="{% url 'kaart:project_bewerk' object.pk %}">Bewerken</a> &middot; <a href="{% url 'kaart:project_lijst' %}">Terug naar de lijst</a></p>
+{% endblock %}

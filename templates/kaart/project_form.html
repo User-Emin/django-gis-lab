@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{% if object %}Project bewerken{% else %}Nieuw project{% endif %}</h1>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_div }}
+  <button type="submit">Opslaan</button>
+</form>
+{% endblock %}

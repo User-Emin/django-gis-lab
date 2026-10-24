@@ -2,7 +2,7 @@
 
 import logging
 
-from werkplek.logging_config import configure_logging
+from projectkaart.logging_config import configure_logging
 
 log = logging.getLogger(__name__)
 

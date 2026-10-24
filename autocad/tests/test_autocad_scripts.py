@@ -97,3 +97,28 @@ def test_haakjes_cli_exitcode(tmp_path):
     )
     assert r.returncode == 1
     assert r.stdout.startswith("kapot.lsp: FOUT")
+
+
+def _json_run(dxf):
+    import json
+
+    p = subprocess.run(
+        [sys.executable, str(AUTOCAD / "python-ezdxf" / "rcs_check.py"), str(dxf), "--json"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    return p.returncode, json.loads(p.stdout)
+
+
+def test_json_uitvoer_goede_dxf():
+    code, d = _json_run(DATA / "plattegrond-bg.dxf")
+    assert code == 0
+    assert d["aantal_bevindingen"] == 0
+    assert len(d["ruimten"]) == 11
+
+
+def test_json_uitvoer_fouten_dxf():
+    code, d = _json_run(DATA / "plattegrond-bg-fouten.dxf")
+    assert code == 1
+    assert d["aantal_bevindingen"] == 5 == len(d["bevindingen"])

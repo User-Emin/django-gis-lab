@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """RCS-laagcontrole + ruimtelijst zonder AutoCAD (ezdxf). Referentie voor de LISP-, .NET- en COM-versie.
 
-Gebruik: uv run python autocad/python-ezdxf/rcs_check.py <tekening.dxf> [uitvoer.csv]
+Gebruik: uv run python autocad/python-ezdxf/rcs_check.py <tekening.dxf> [uitvoer.csv] [--json]
+
+--json: alleen een JSON-object op stdout (bestand, bevindingen, ruimten, aantal_bevindingen); exit 1 bij bevindingen.
 
 Zelfde regels als lisp/rcs-check.lsp:
 - laagnaam: 2 cijfers + spatie + omschrijving (A-Z a-z 0-9 spatie - _), laag 0 en Defpoints uitgezonderd
@@ -16,6 +18,7 @@ Extra, alleen in deze Python-versie (shapely/GEOS), BEWUST NIET in de LISP- en .
 """
 
 import csv
+import json
 import math
 import re
 import sys
@@ -157,21 +160,33 @@ def controleer(pad):
     return regels, rijen
 
 
+def als_json(pad, regels, rijen):
+    """Machineleesbare vorm (voor CI): bevindingen = de FOUT-regels, ruimten = de CSV-rijen."""
+    kop = ["nummer", "handle", "gesloten", "opp_m2_zonder_bulge", "opp_m2_met_bulge"]
+    bevindingen = [r for r in regels if r.startswith("FOUT")]
+    return {
+        "bestand": pad.split("/")[-1],
+        "aantal_bevindingen": len(bevindingen),
+        "bevindingen": bevindingen,
+        "ruimten": [dict(zip(kop, rij, strict=True)) for rij in rijen],
+    }
+
+
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        sys.exit("gebruik: rcs_check.py <tekening.dxf> [uitvoer.csv]")
-    regels, rijen = controleer(sys.argv[1])
-    print("\n".join(regels))
-    if len(sys.argv) > 2:
-        with open(sys.argv[2], "w", newline="", encoding="utf-8") as f:
+    args = [a for a in sys.argv[1:] if a != "--json"]
+    json_modus = "--json" in sys.argv[1:]
+    if not args:
+        sys.exit("gebruik: rcs_check.py <tekening.dxf> [uitvoer.csv] [--json]")
+    regels, rijen = controleer(args[0])
+    if json_modus:
+        uit = als_json(args[0], regels, rijen)
+        print(json.dumps(uit, ensure_ascii=False, indent=2))
+    else:
+        print("\n".join(regels))
+    if len(args) > 1:
+        with open(args[1], "w", newline="", encoding="utf-8") as f:
             w = csv.writer(f, delimiter=";")
-            w.writerow(
-                [
-                    "nummer",
-                    "handle",
-                    "gesloten",
-                    "opp_m2_zonder_bulge",
-                    "opp_m2_met_bulge",
-                ]
-            )
+            w.writerow(["nummer", "handle", "gesloten", "opp_m2_zonder_bulge", "opp_m2_met_bulge"])
             w.writerows(rijen)
+    if json_modus and uit["aantal_bevindingen"]:
+        sys.exit(1)

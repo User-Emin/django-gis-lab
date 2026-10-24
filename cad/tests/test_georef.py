@@ -121,6 +121,7 @@ def test_command_weigert_onbekende_tekening(tmp_path):
         call_command("georefereer", 999999, paspunten=WAARHEID)
 
 
+@pytest.mark.skipif(not WAARHEID.exists(), reason="prep-map ontbreekt")
 @pytest.mark.django_db
 def test_max_rmse_weigert_fout_set(tmp_path):
     t = Tekening.objects.create(naam="t.dxf", eenheid="?")

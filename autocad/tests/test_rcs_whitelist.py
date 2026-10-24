@@ -61,3 +61,14 @@ def test_cli_optie_lagen(tmp_path):
     )
     assert "FOUT laagnaam" not in p.stdout
     assert "Klaar: 4 bevinding(en)" in p.stdout
+
+
+def test_whitelist_slaat_commentaarregels_over(tmp_path):
+    bestand = tmp_path / "lagen.txt"
+    bestand.write_text("# toegestaan\nRuimten\n", encoding="utf-8")
+    assert rcs_check.laad_whitelist(str(bestand)) == ["Ruimten"]
+
+
+def test_whitelist_is_hoofdlettergevoelig():
+    regels, _ = rcs_check.controleer(FOUTEN_DXF, toegestaan=["ruimten"])
+    assert any("'Ruimten'" in r for r in _laagfouten(regels))

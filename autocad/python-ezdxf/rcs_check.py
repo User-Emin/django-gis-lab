@@ -76,9 +76,9 @@ def binnen(p, pts):
 
 
 def laad_whitelist(pad):
-    """Leest toegestane laagnamen/patronen uit een tekstbestand (een per regel, lege regels overgeslagen)."""
+    """Leest toegestane laagnamen/patronen uit een tekstbestand (een per regel; lege regels en #-commentaar overgeslagen)."""
     with open(pad, encoding="utf-8") as f:
-        return [r.strip() for r in f if r.strip()]
+        return [r.strip() for r in f if r.strip() and not r.lstrip().startswith("#")]
 
 
 def controleer(pad, toegestaan=None):
@@ -93,7 +93,7 @@ def controleer(pad, toegestaan=None):
         naam = laag.dxf.name
         if naam.lower() in UITGEZONDERD:
             continue
-        if not LAAG_RE.match(naam) and not any(fnmatch.fnmatch(naam, p) for p in toegestaan):
+        if not LAAG_RE.match(naam) and not any(fnmatch.fnmatchcase(naam, p) for p in toegestaan):
             regels.append(f"FOUT laagnaam: '{naam}' voldoet niet aan '## omschrijving'")
             fouten += 1
         if per_laag[naam] == 0:

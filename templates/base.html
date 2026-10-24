@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Projectkaart{% endblock %}</title>
+  <style>
+    body { font: 16px/1.5 system-ui, sans-serif; max-width: 62rem; margin: 2rem auto; padding: 0 1rem; color: #1b2733; }
+    nav a { margin-right: 1rem; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { text-align: left; padding: .35rem .6rem; border-bottom: 1px solid #d8dee4; }
+    .fout, .errorlist { color: #b3261e; }
+    .errorlist { list-style: none; padding: 0; margin: .25rem 0; }
+    label { display: block; font-weight: 600; margin-top: 1rem; }
+    input, select { font: inherit; padding: .35rem; min-width: 22rem; }
+    button { font: inherit; padding: .4rem 1rem; margin-top: 1rem; }
+    .melding { background: #e7f4ea; padding: .5rem .8rem; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <nav><strong>Projectkaart</strong>
+    <a href="{% url 'kaart:home' %}">Start</a>
+    <a href="{% url 'kaart:tekeningen_langzaam' %}">Tekeningen (langzaam)</a>
+    <a href="{% url 'kaart:tekeningen_snel' %}">Tekeningen (snel)</a>
+  </nav>
+  {% block content %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ titel }}</h1>
+<p>{{ tekeningen|length }} tekeningen</p>
+<table>
+  <thead><tr><th>Tekening</th><th>Versie</th><th>Project</th><th>Opdrachtgever</th></tr></thead>
+  <tbody>
+  {% for t in tekeningen %}
+    <tr><td>{{ t.naam }}</td><td>{{ t.versie }}</td><td>{{ t.project.naam }}</td><td>{{ t.project.opdrachtgever }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

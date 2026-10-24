@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Projecten</h1>
+<table>
+  <thead><tr><th>Project</th><th>Status</th><th>Tekeningen</th></tr></thead>
+  <tbody>{% for p in projecten %}<tr><td>{{ p.naam }}</td><td>{{ p.get_status_display }}</td><td>{{ p.aantal }}</td></tr>{% endfor %}</tbody>
+</table>
+{% endblock %}

@@ -1,4 +1,5 @@
-"""python manage.py georefereer <tekening_id> --paspunten <json> [--soort affien|helmert] [--droog]
+"""python manage.py georefereer <tekening_id> --paspunten <json>
+    [--soort affien|helmert] [--max-rmse M] [--droog]
 
 Schat de transformatie lokaal -> RD uit paspunten, print de restfouten en (zonder --droog)
 vult ``Ruimte.geom_rd``. Het JSON-bestand is een lijst of een object met sleutel "paspunten";
@@ -36,9 +37,12 @@ class Command(BaseCommand):
         parser.add_argument("tekening_id", type=int)
         parser.add_argument("--paspunten", type=Path, required=True)
         parser.add_argument("--soort", choices=["affien", "helmert"], default="affien")
+        parser.add_argument(
+            "--max-rmse", type=float, default=None, help="weiger als de RMSE (m) hoger is"
+        )
         parser.add_argument("--droog", action="store_true", help="alleen meten, niets opslaan")
 
-    def handle(self, *args, tekening_id, paspunten, soort, droog, **opties):
+    def handle(self, *args, tekening_id, paspunten, soort, max_rmse, droog, **opties):
         try:
             tekening = Tekening.objects.get(pk=tekening_id)
         except Tekening.DoesNotExist:
@@ -48,6 +52,12 @@ class Command(BaseCommand):
             r = georef.bereken(punten, soort)
         except ValueError as fout:
             raise CommandError(str(fout)) from fout
+        if max_rmse is not None and r.rmse > max_rmse:
+            raise CommandError(
+                f"RMSE {r.rmse:.4f} m is hoger dan de drempel {max_rmse} m; "
+                "controleer de paspunten (bij 4 punten: probeer --soort helmert, "
+                "die wijst het foute punt aan)"
+            )
         w = self.stdout.write
         w(f"Tekening {tekening.pk} ({tekening.naam}), {soort}, {len(punten)} paspunten")
         w(f"{'punt':<5}{'residu (m)':>12}{'zonder dit punt (m)':>22}")

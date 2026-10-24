@@ -119,3 +119,21 @@ def test_postgis_st_affine_geeft_hetzelfde_als_python():
 def test_command_weigert_onbekende_tekening(tmp_path):
     with pytest.raises(CommandError):
         call_command("georefereer", 999999, paspunten=WAARHEID)
+
+
+@pytest.mark.django_db
+def test_max_rmse_weigert_fout_set(tmp_path):
+    t = Tekening.objects.create(naam="t.dxf", eenheid="?")
+    importeer_dxf(DATA / "plattegrond-bg.dxf", t)
+    data = json.loads(WAARHEID.read_text())
+    punten = data["paspunten"] if isinstance(data, dict) else data
+    punt_c = next(p for p in punten if p["naam"] == "C")
+    punt_c["rd_m"][0] += 2.0
+    fout = tmp_path / "fout.json"
+    fout.write_text(json.dumps(data))
+    with pytest.raises(CommandError, match="hoger dan de drempel"):
+        call_command("georefereer", t.pk, paspunten=fout, max_rmse=0.1)
+    assert not t.ruimtes.exclude(geom_rd=None).exists()
+    out = tmp_path / "u"
+    call_command("georefereer", t.pk, paspunten=WAARHEID, max_rmse=0.1, stdout=open(out, "w"))
+    assert t.ruimtes.exclude(geom_rd=None).count() == 11

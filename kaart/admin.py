@@ -53,6 +53,23 @@ class BouwperiodeFilter(admin.SimpleListFilter):
         return queryset.filter(**grenzen[self.value()]) if self.value() in grenzen else queryset
 
 
+class BuurtFilter(admin.SimpleListFilter):
+    title = "buurt"
+    parameter_name = "buurt"
+
+    def lookups(self, request, model_admin):
+        return Buurt.objects.order_by("buurtnaam").values_list("pk", "buurtnaam")
+
+    def queryset(self, request, queryset):
+        if not self.value():
+            return queryset
+        geom = Buurt.objects.filter(pk=self.value()).values_list("geom", flat=True).first()
+        if geom is None:
+            return queryset.none()
+        # within: panden die over de buurtgrens liggen vallen eruit (intersects neemt ze mee)
+        return queryset.filter(geom__within=geom)
+
+
 @admin.register(Buurt)
 class BuurtAdmin(GISModelAdmin):
     list_display = ["buurtnaam", "buurtcode", "aantalinwoners", "dichtheid"]
@@ -63,7 +80,7 @@ class BuurtAdmin(GISModelAdmin):
 @admin.register(Pand)
 class PandAdmin(GISModelAdmin):
     list_display = ["identificatie", "bouwjaar", "oppervlak_m2", "status", "gebruiksdoel"]
-    list_filter = ["status", BouwperiodeFilter]
+    list_filter = ["status", BouwperiodeFilter, BuurtFilter]
     search_fields = ["identificatie"]
     list_per_page = 50
     exclude = ["midden_wgs", "midden_geo"]

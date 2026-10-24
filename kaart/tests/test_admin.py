@@ -61,3 +61,35 @@ def test_kijker_ziet_geen_tekeningen(client, kijker):
     r = client.get(reverse("admin:index"))
     assert b"Tekeningen" in r.content  # view_tekening zit ook in de groep
     assert client.get(reverse("admin:auth_user_changelist")).status_code == 403
+
+
+def test_filter_buurt(admin_client, panden):
+    from django.contrib.gis.geos import MultiPolygon, Polygon
+
+    groot = Polygon(((-1, -1), (-1, 11), (11, 11), (11, -1), (-1, -1)), srid=28992)
+    from kaart.models import Buurt
+
+    b = Buurt.objects.create(
+        gid=1,
+        buurtcode="BU1",
+        buurtnaam="Testbuurt",
+        aantalinwoners=0,
+        dichtheid=0,
+        landha=0,
+        jaar=2024,
+        geom=MultiPolygon(groot, srid=28992),
+    )
+    elders = Pand.objects.create(
+        gid=9,
+        identificatie="9" * 16,
+        bouwjaar=2001,
+        status="Pand in gebruik",
+        aantal_verblijfsobjecten=1,
+        geom=MultiPolygon(
+            Polygon(((50, 50), (50, 60), (60, 60), (60, 50), (50, 50)), srid=28992), srid=28992
+        ),
+    )
+    r = admin_client.get(reverse("admin:kaart_pand_changelist"), {"buurt": b.pk})
+    assert r.status_code == 200
+    assert {p.pk for p in r.context["cl"].result_list} == {p.pk for p in panden}
+    assert elders.pk not in {p.pk for p in r.context["cl"].result_list}

@@ -7,7 +7,7 @@ Elke les heeft een tag: `git checkout les-NN`.
 |---|---|
 | les-01..03 | begin: README, .gitignore, .env.example |
 | les-04 | uv-project, ruff, pre-commit, logging |
-| les-05 | Django 5.2 LTS-project, settings per omgeving |
+| les-05 | Django 6.1 (les 05 legt LTS 5.2 vs feature-release 6.1 uit)-project, settings per omgeving |
 | les-06 | app `kaart`: modellen, migraties, debug-toolbar, N+1 |
 | les-07 | views, templates, formulier met validatie en CSRF |
 | les-08 | pytest-django, factory-boy, coverage |

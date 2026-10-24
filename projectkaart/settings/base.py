@@ -45,6 +45,10 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.gis",
+    "rest_framework",
+    "rest_framework_gis",
+    "django_filters",
+    "drf_spectacular",
     "kaart",
 ]
 
@@ -116,4 +120,20 @@ LOGGING = {
     "formatters": {"basis": {"format": "%(asctime)s %(levelname)-8s %(name)s: %(message)s"}},
     "handlers": {"console": {"class": "logging.StreamHandler", "formatter": "basis"}},
     "root": {"handlers": ["console"], "level": env("DJANGO_LOG_LEVEL", "INFO")},
+}
+
+
+REST_FRAMEWORK = {
+    "DEFAULT_PAGINATION_CLASS": "kaart.paginering.KaartPaginering",
+    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    # Alleen lezen: geen schrijfrechten via de API (les 13)
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.AllowAny"],
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Projectkaart API",
+    "DESCRIPTION": "Panden, buurten en projecten als GeoJSON (Almere).",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
 }

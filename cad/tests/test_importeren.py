@@ -140,3 +140,14 @@ def test_management_command_print_rapport(capsys, settings, tmp_path):
     uit = capsys.readouterr().out
     assert '"aantal_ruimtes": 11' in uit
     assert "0034100000049762" in uit
+
+
+def test_importeer_dxf_droog(settings, tmp_path, capsys):
+    settings.MEDIA_ROOT = tmp_path
+    call_command("importeer_dxf", DATA / "plattegrond-bg.dxf", "--droog")
+    uit = capsys.readouterr().out
+    assert '"aantal_ruimtes": 11' in uit
+    assert "Droog: niets opgeslagen" in uit
+    assert Tekening.objects.count() == 0
+    assert Ruimte.objects.count() == 0
+    assert not list(tmp_path.rglob("*.dxf"))

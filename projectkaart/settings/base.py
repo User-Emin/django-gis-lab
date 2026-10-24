@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "django_filters",
     "drf_spectacular",
     "kaart",
+    "cad",
 ]
 
 MIDDLEWARE = [

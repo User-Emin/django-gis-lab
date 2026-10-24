@@ -1,0 +1,78 @@
+{
+  "beschrijving": "lokaal (mm, 1e kwadrant) -> RD (m): rd = B_rd + R(+theta) * (lokaal - (500,500)) / 1000",
+  "schaal_lokaal_naar_rd": 0.001,
+  "rotatie_lokaal_naar_rd_graden": -18.998031,
+  "rotatie_rd_naar_lokaal_graden": 18.998031,
+  "oorsprong_lokaal_mm": [
+    500.0,
+    500.0
+  ],
+  "oorsprong_lokaal_in_rd_m": [
+    143068.299,
+    487778.498
+  ],
+  "verschuiving_rd_m_van_lokaal_00": [
+    143067.66346728685,
+    487778.1880029508
+  ],
+  "affien_lokaal_mm_naar_rd_m": {
+    "x_rd = a*x + b*y + c": [
+      0.0009455297623571623,
+      0.00032553566393992583,
+      143067.66346728685
+    ],
+    "y_rd = d*x + e*y + f": [
+      -0.00032553566393992583,
+      0.0009455297623571623,
+      487778.1880029508
+    ]
+  },
+  "paspunten": [
+    {
+      "naam": "A",
+      "lokaal_mm": [
+        438.0,
+        30091.0
+      ],
+      "rd_m": [
+        143077.873,
+        487806.497
+      ]
+    },
+    {
+      "naam": "B",
+      "lokaal_mm": [
+        500.0,
+        500.0
+      ],
+      "rd_m": [
+        143068.299,
+        487778.498
+      ]
+    },
+    {
+      "naam": "C",
+      "lokaal_mm": [
+        30168.0,
+        500.0
+      ],
+      "rd_m": [
+        143096.351,
+        487768.84
+      ]
+    },
+    {
+      "naam": "F",
+      "lokaal_mm": [
+        30047.0,
+        30150.0
+      ],
+      "rd_m": [
+        143105.889,
+        487796.914
+      ]
+    }
+  ],
+  "tolerantie": "lokale coordinaten zijn op 1 mm afgerond; terugrekenen geeft < 2 mm afwijking in RD",
+  "crs_rd": "EPSG:28992"
+}

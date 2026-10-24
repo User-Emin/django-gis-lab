@@ -1,0 +1,39 @@
+{
+  "identificatie": "0034100000049762",
+  "bouwjaar": 2002,
+  "status": "Pand in gebruik",
+  "gebruiksdoel": "kantoorfunctie",
+  "bag_oppervlakte_min": 712,
+  "bag_oppervlakte_max": 787,
+  "aantal_verblijfsobjecten": 3,
+  "oppervlakte_contour_m2": 877.9,
+  "crs": "EPSG:28992",
+  "hoekpunten_rd": {
+    "A": [
+      143077.873,
+      487806.497
+    ],
+    "B": [
+      143068.299,
+      487778.498
+    ],
+    "C": [
+      143096.351,
+      487768.84
+    ],
+    "D": [
+      143101.011,
+      487782.556
+    ],
+    "E": [
+      143101.067,
+      487782.722
+    ],
+    "F": [
+      143105.889,
+      487796.914
+    ]
+  },
+  "bron": "BAG via PDOK, subset ~/django-lab/data/almere.gpkg (laag panden), gelezen 2026-10-24",
+  "opmerking": "De plattegrond is fictief; alleen de contour is echt."
+}

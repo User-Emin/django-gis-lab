@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """RCS-laagcontrole + ruimtelijst zonder AutoCAD (ezdxf). Referentie voor de LISP-, .NET- en COM-versie.
 
-Gebruik: uv run python autocad/python-ezdxf/rcs_check.py <tekening.dxf> [uitvoer.csv] [--json]
+Gebruik: uv run python autocad/python-ezdxf/rcs_check.py <tekening.dxf> [uitvoer.csv] [--json] [--lagen <bestand>]
+
+--lagen: tekstbestand met toegestane laagnamen of patronen (een per regel, bv. 'Ruimten' of 'Ruim*');
+  die lagen krijgen geen laagnaamfout. Lege-laag- en laag-0-controles blijven gelden.
 
 --json: alleen een JSON-object op stdout (bestand, bevindingen, ruimten, aantal_bevindingen); exit 1 bij bevindingen.
 
@@ -18,6 +21,7 @@ Extra, alleen in deze Python-versie (shapely/GEOS), BEWUST NIET in de LISP- en .
 """
 
 import csv
+import fnmatch
 import json
 import math
 import re
@@ -71,7 +75,14 @@ def binnen(p, pts):
     return res
 
 
-def controleer(pad):
+def laad_whitelist(pad):
+    """Leest toegestane laagnamen/patronen uit een tekstbestand (een per regel, lege regels overgeslagen)."""
+    with open(pad, encoding="utf-8") as f:
+        return [r.strip() for r in f if r.strip()]
+
+
+def controleer(pad, toegestaan=None):
+    toegestaan = toegestaan or []
     doc = ezdxf.readfile(pad)
     msp = doc.modelspace()
     regels, fouten = [], 0
@@ -82,7 +93,7 @@ def controleer(pad):
         naam = laag.dxf.name
         if naam.lower() in UITGEZONDERD:
             continue
-        if not LAAG_RE.match(naam):
+        if not LAAG_RE.match(naam) and not any(fnmatch.fnmatch(naam, p) for p in toegestaan):
             regels.append(f"FOUT laagnaam: '{naam}' voldoet niet aan '## omschrijving'")
             fouten += 1
         if per_laag[naam] == 0:
@@ -173,11 +184,17 @@ def als_json(pad, regels, rijen):
 
 
 if __name__ == "__main__":
-    args = [a for a in sys.argv[1:] if a != "--json"]
-    json_modus = "--json" in sys.argv[1:]
+    argv = sys.argv[1:]
+    toegestaan = []
+    if "--lagen" in argv:
+        i = argv.index("--lagen")
+        toegestaan = laad_whitelist(argv[i + 1])
+        del argv[i : i + 2]
+    args = [a for a in argv if a != "--json"]
+    json_modus = "--json" in argv
     if not args:
-        sys.exit("gebruik: rcs_check.py <tekening.dxf> [uitvoer.csv] [--json]")
-    regels, rijen = controleer(args[0])
+        sys.exit("gebruik: rcs_check.py <tekening.dxf> [uitvoer.csv] [--json] [--lagen <bestand>]")
+    regels, rijen = controleer(args[0], toegestaan)
     if json_modus:
         uit = als_json(args[0], regels, rijen)
         print(json.dumps(uit, ensure_ascii=False, indent=2))

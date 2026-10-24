@@ -12,7 +12,7 @@ from cad.management.commands.georefereer import lees_paspunten
 from cad.models import Tekening
 
 DATA = Path(__file__).resolve().parents[2] / "data" / "cad"
-WAARHEID = Path.home() / "django-lab-e-prep" / "georef-waarheid.json"
+WAARHEID = DATA / "georef-waarheid.json"
 
 
 def _punten(n=4, matrix=(0.9, 0.4, 143000.0, -0.4, 0.9, 487000.0)):
@@ -66,7 +66,6 @@ def test_fout_punt_geeft_grootste_residu_op_dat_punt():
     assert max(range(4), key=lambda i: h.residuen[i]) == 2
 
 
-@pytest.mark.skipif(not WAARHEID.exists(), reason="prep-map ontbreekt")
 def test_waarheid_paspunten_en_foutvariant():
     punten = lees_paspunten(WAARHEID)
     r = georef.bereken(punten, "affien")
@@ -80,7 +79,6 @@ def test_waarheid_paspunten_en_foutvariant():
     assert georef.bereken(punten, "affien").rmse > 0.3
 
 
-@pytest.mark.skipif(not WAARHEID.exists(), reason="prep-map ontbreekt")
 @pytest.mark.django_db
 def test_command_vult_geom_rd_binnen_bagpand(tmp_path):
     t = Tekening.objects.create(naam="t.dxf", eenheid="?")
@@ -121,7 +119,6 @@ def test_command_weigert_onbekende_tekening(tmp_path):
         call_command("georefereer", 999999, paspunten=WAARHEID)
 
 
-@pytest.mark.skipif(not WAARHEID.exists(), reason="prep-map ontbreekt")
 @pytest.mark.django_db
 def test_max_rmse_weigert_fout_set(tmp_path):
     t = Tekening.objects.create(naam="t.dxf", eenheid="?")

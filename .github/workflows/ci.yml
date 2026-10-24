@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgis:
+        # Lab: PostgreSQL 17 + PostGIS 3.6.4; deze tag volgt PostGIS 3.6 op PG 17.
+        image: postgis/postgis:17-3.6
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci-only-dummy-password
+          POSTGRES_DB: ci_gis
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DJANGO_SETTINGS_MODULE: projectkaart.settings.test
+      DJANGO_DEBUG: "0"
+      DJANGO_ALLOWED_HOSTS: ci.invalid
+      DB_NAME: ci_gis
+      DB_HOST: localhost
+      DB_PORT: "5432"
+      DB_USER: postgres
+      DB_PASSWORD: ci-only-dummy-password
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: GDAL, GEOS en PROJ installeren
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gdal-bin libgdal-dev libgeos-dev libproj-dev
+          echo "GDAL op de runner: $(gdal-config --version)"
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Dependencies
+        run: uv sync --locked
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Frontend bouwen (Vite-manifest voor de templates)
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: SECRET_KEY genereren (alleen voor deze run)
+        run: echo "DJANGO_SECRET_KEY=$(python3 -c 'import secrets; print(secrets.token_urlsafe(50))')" >> "$GITHUB_ENV"
+
+      - name: ruff
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+
+      - name: pytest met coverage
+        run: uv run pytest -q --cov --cov-report=term-missing
+
+  dotnet:
+    name: dotnet
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+      - name: dotnet build RcsCheck (NuGet-referenties AutoCAD.NET.Core/Model)
+        run: dotnet build autocad/dotnet/RcsCheck -c Release

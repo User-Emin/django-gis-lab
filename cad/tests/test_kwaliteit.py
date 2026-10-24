@@ -14,10 +14,7 @@ from kaart.models import Pand
 DATA = Path(__file__).resolve().parents[2] / "data" / "cad"
 WAARHEID = DATA / "georef-waarheid.json"
 
-pytestmark = [
-    pytest.mark.django_db,
-    pytest.mark.skipif(not WAARHEID.exists(), reason="georef-waarheid ontbreekt"),
-]
+pytestmark = pytest.mark.django_db
 
 
 def _tekening(dxf: str, georefereer: bool = True) -> Tekening:

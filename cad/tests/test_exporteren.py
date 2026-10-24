@@ -10,14 +10,11 @@ from django.db import connection
 
 from cad import exporteren, kwaliteit
 from cad.dxf import RUIMTELAAG
-from cad.tests.test_kwaliteit import DATA, WAARHEID
+from cad.tests.test_kwaliteit import DATA
 from cad.tests.test_kwaliteit import _tekening as _tekening_stale
 from kaart.models import Pand
 
-pytestmark = [
-    pytest.mark.django_db,
-    pytest.mark.skipif(not WAARHEID.exists(), reason="georef-waarheid ontbreekt"),
-]
+pytestmark = pytest.mark.django_db
 
 
 def _tekening(dxf: str, georefereer: bool = True):

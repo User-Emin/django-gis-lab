@@ -66,3 +66,15 @@ def test_zoom_of_positie_buiten_grid_is_404(client, almere):
 
 def test_alleen_get(client, almere):
     assert client.post("/tiles/panden/9/10/10.pbf").status_code == 405
+
+
+def test_bouwjaar_filter_en_eigen_cachesleutel(client, almere):
+    x, y = tegel_voor(10, 143515, 486811)
+    url = f"/tiles/panden/10/{x}/{y}.pbf"
+    alles = client.get(url)
+    leeg = client.get(url + "?bouwjaar_vanaf=9999")
+    assert alles["X-Tile-Cache"] == "MISS"
+    assert leeg["X-Tile-Cache"] == "MISS"  # eigen sleutel: niet uit de ongefilterde cache
+    assert len(alles.content) > 0 and leeg.content == b""
+    assert client.get(url)["X-Tile-Cache"] == "HIT"
+    assert client.get(url + "?bouwjaar_vanaf=abc").status_code == 400

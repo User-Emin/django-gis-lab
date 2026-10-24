@@ -39,6 +39,7 @@ mvt AS (
     WHERE p.geom && ST_Expand(
               env.geom, (ST_XMax(env.geom) - ST_XMin(env.geom)) * %(buffer)s / %(extent)s)
       AND ST_Area(p.geom) >= %(minarea)s
+      AND (%(bj)s::int IS NULL OR p.bouwjaar >= %(bj)s::int)
 )
 SELECT ST_AsMVT(mvt.*, %(laag)s, %(extent)s, 'geom') FROM mvt
 """
@@ -65,7 +66,9 @@ def tolerantie(z: int, modus: str) -> tuple[float, float]:
     return pixel_m(z) / 2, pixel_m(z) ** 2
 
 
-def maak_tile(z: int, x: int, y: int, modus: str = "topo") -> bytes:
+def maak_tile(
+    z: int, x: int, y: int, modus: str = "topo", bouwjaar_vanaf: int | None = None
+) -> bytes:
     tol, minarea = tolerantie(z, modus)
     params = {
         "z": z,
@@ -80,6 +83,7 @@ def maak_tile(z: int, x: int, y: int, modus: str = "topo") -> bytes:
         "extent": EXTENT,
         "buffer": BUFFER,
         "laag": LAAG,
+        "bj": bouwjaar_vanaf,
     }
     with connection.cursor() as cursor:
         cursor.execute(TILE_SQL, params)
@@ -93,12 +97,17 @@ def panden_tile(request, z: int, x: int, y: int):
     if z > MAX_ZOOM or x >= 2**z or y >= 2**z:
         raise Http404("Tegel valt buiten het PDOK-grid (zoom 0-14).")
     modus = "geen" if request.GET.get("vereenvoudig") == "geen" else "topo"
-    sleutel = f"tile:{LAAG}:{modus}:{z}:{x}:{y}"
+    try:
+        bj = int(request.GET["bouwjaar_vanaf"]) if "bouwjaar_vanaf" in request.GET else None
+    except ValueError:
+        return HttpResponse("bouwjaar_vanaf moet een geheel getal zijn.", status=400)
+    # Zelf 16: elke parameter die de inhoud verandert hoort in de cache-sleutel
+    sleutel = f"tile:{LAAG}:{modus}:{bj}:{z}:{x}:{y}"
     data = cache.get(sleutel)
     status = "HIT"
     if data is None:
         status = "MISS"
-        data = maak_tile(z, x, y, modus)
+        data = maak_tile(z, x, y, modus, bj)
         cache.set(sleutel, data, CACHE_SECONDEN)
     antwoord = HttpResponse(data, content_type=CONTENT_TYPE)
     antwoord["X-Tile-Cache"] = status

@@ -5,6 +5,7 @@ import Overlay from "ol/Overlay";
 import GeoJSON from "ol/format/GeoJSON";
 import VectorLayer from "ol/layer/Vector";
 import TileLayer from "ol/layer/Tile";
+import type WMTS from "ol/source/WMTS";
 import OSM from "ol/source/OSM";
 import VectorSource from "ol/source/Vector";
 import { bbox as bboxStrategy } from "ol/loadingstrategy";
@@ -46,6 +47,14 @@ const panden = new VectorLayer({
     stroke: new Stroke({ color: "#a33d12", width: 1 }),
   }),
 });
+// Zelf les 14: buurtlaag onder de panden; een klik buiten een pand toont de buurtnaam
+const buurten = new VectorLayer({
+  source: apiBron("/api/buurten/"),
+  style: new Style({
+    fill: new Fill({ color: "rgba(40, 120, 90, 0.08)" }),
+    stroke: new Stroke({ color: "#1c6b4f", width: 2.5, lineDash: [8, 5] }),
+  }),
+});
 const projecten = new VectorLayer({
   source: apiBron("/api/projecten/"),
   style: new Style({
@@ -58,13 +67,17 @@ const projecten = new VectorLayer({
 });
 
 const achtergrond = FOUT ? new TileLayer({ source: new OSM() }) : brtAchtergrond();
+// Zelf les 14: laagwisselaar (standaard/grijs/pastel) via de laag-parameter van brtAchtergrond
+const ACHTERGRONDEN = ["standaard", "grijs", "pastel"];
+const startLaag = new URLSearchParams(location.search).get("laag") ?? "standaard";
+let huidige: TileLayer<WMTS> = achtergrond as TileLayer<WMTS>;
 const view = FOUT
   ? new View({ center: CENTRUM, zoom: 12 }) // de fout: RD-meters als Web Mercator-meters
   : new View({ projection: RD, center: CENTRUM, resolutions: RESOLUTIONS, zoom: 12 });
 
 const kaart = new Map({
   target: "kaart",
-  layers: [achtergrond, panden, projecten],
+  layers: [achtergrond, buurten, panden, projecten],
   view,
 });
 
@@ -78,11 +91,17 @@ function toonPopup(f: FeatureLike, coord: number[]) {
   const p = f.getProperties();
   popupEl.replaceChildren();
   const kop = document.createElement("h3");
-  kop.textContent = p.naam ? `Project: ${p.naam}` : `Pand ${p.identificatie}`;
+  kop.textContent = p.naam
+    ? `Project: ${p.naam}`
+    : p.buurtnaam
+      ? `Buurt: ${p.buurtnaam}`
+      : `Pand ${p.identificatie}`;
   const lijst = document.createElement("dl");
   const velden: [string, unknown][] = p.naam
     ? [["Opdrachtgever", p.opdrachtgever], ["Status", p.status]]
-    : [["Bouwjaar", p.bouwjaar], ["Status", p.status], ["Gebruiksdoel", p.gebruiksdoel ?? "onbekend"]];
+    : p.buurtnaam
+      ? [["Buurtcode", p.buurtcode], ["Inwoners", p.aantalinwoners], ["Dichtheid", p.dichtheid]]
+      : [["Bouwjaar", p.bouwjaar], ["Status", p.status], ["Gebruiksdoel", p.gebruiksdoel ?? "onbekend"]];
   for (const [k, v] of velden) {
     const dt = document.createElement("dt"); dt.textContent = k;
     const dd = document.createElement("dd"); dd.textContent = String(v);
@@ -104,6 +123,24 @@ kaart.on("pointermove", (e) => {
   if (doel) doel.style.cursor = kaart.hasFeatureAtPixel(e.pixel) ? "pointer" : "";
 });
 
+// Laagwisselaar-knoppen
+if (!FOUT) {
+  const balk = document.getElementById("lagen")!;
+  const wissel = (naam: string) => {
+    kaart.getLayers().remove(huidige);
+    huidige = brtAchtergrond(naam);
+    kaart.getLayers().insertAt(0, huidige);
+    balk.querySelectorAll("button").forEach((b) => b.classList.toggle("aan", b.dataset.laag === naam));
+  };
+  for (const naam of ACHTERGRONDEN) {
+    const b = document.createElement("button");
+    b.textContent = naam; b.dataset.laag = naam;
+    b.addEventListener("click", () => wissel(naam));
+    balk.append(b);
+  }
+  wissel(startLaag);
+}
+
 // Statusregel: stelsel, zoomniveau, resolutie
 const info = document.getElementById("info")!;
 function werkInfoBij() {
@@ -116,5 +153,5 @@ werkInfoBij();
 // Klaarsignaal voor screenshots: alle tegels en features geladen
 (window as unknown as { kaartKlaar: () => boolean }).kaartKlaar = () =>
   !kaart.getAllLayers().some((l) => (l.getSource() as { loading?: boolean } | null)?.loading) &&
-  !(achtergrond.getSource() as unknown as { getState(): string }).getState().includes("loading");
+  !(huidige.getSource() as unknown as { getState(): string }).getState().includes("loading");
 (window as unknown as { kaart: Map }).kaart = kaart;

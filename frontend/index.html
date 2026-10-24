@@ -8,6 +8,9 @@
       html, body { margin: 0; height: 100%; font-family: system-ui, sans-serif; }
       #kaart { position: absolute; inset: 0; }
       #info { position: absolute; left: 10px; bottom: 10px; z-index: 5; background: #fffd; padding: 4px 8px; font: 12px ui-monospace, monospace; border-radius: 3px; }
+      #lagen { position: absolute; right: 10px; top: 10px; z-index: 5; background: #fffd; padding: 4px; border-radius: 3px; display: flex; gap: 4px; }
+      #lagen button { font: 13px system-ui; padding: 4px 10px; border: 1px solid #567; background: #fff; border-radius: 3px; cursor: pointer; }
+      #lagen button.aan { background: #234; color: #fff; }
       #popup { background: #fff; border: 1px solid #234; border-radius: 4px; padding: 8px 10px; font-size: 13px; min-width: 190px; box-shadow: 0 2px 8px #0005; transform: translate(-50%, -100%) translateY(-12px); }
       #popup h3 { margin: 0 0 4px; font-size: 14px; }
       #popup dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 2px 8px; }
@@ -17,6 +20,7 @@
   </head>
   <body>
     <div id="kaart"></div>
+    <div id="lagen"></div>
     <div id="info"></div>
     <div id="popup" hidden></div>
     <script type="module" src="/src/main.ts"></script>

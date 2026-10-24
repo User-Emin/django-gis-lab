@@ -1,6 +1,7 @@
 from django.db.models import Count
 from django.shortcuts import render
 from django.urls import reverse_lazy
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
 
 from .forms import ProjectForm
@@ -74,3 +75,9 @@ class ProjectBewerk(UpdateView):
     model = Project
     form_class = ProjectForm
     success_url = reverse_lazy("kaart:project_lijst")
+
+
+@ensure_csrf_cookie
+def kaart_tekenen(request):
+    """De Vite-gebouwde kaart; ensure_csrf_cookie zet de cookie `csrftoken` voor X-CSRFToken."""
+    return render(request, "kaart/kaart.html")

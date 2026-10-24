@@ -8,6 +8,7 @@ router = DefaultRouter()
 router.register("panden", api.PandViewSet, basename="pand")
 router.register("buurten", api.BuurtViewSet, basename="buurt")
 router.register("projecten", api.ProjectViewSet, basename="project")
+router.register("gebieden", api.GebiedViewSet, basename="gebied")
 
 urlpatterns = [
     path("schema/", SpectacularAPIView.as_view(), name="schema"),

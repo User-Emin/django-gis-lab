@@ -1,4 +1,5 @@
 import "ol/ol.css";
+import "./stijl.css";
 import Map from "ol/Map";
 import View from "ol/View";
 import Overlay from "ol/Overlay";
@@ -12,6 +13,7 @@ import { bbox as bboxStrategy } from "ol/loadingstrategy";
 import { Circle as CircleStyle, Fill, Stroke, Style } from "ol/style";
 import type { FeatureLike } from "ol/Feature";
 import type Feature from "ol/Feature";
+import { startTekenen } from "./tekenen";
 import { RESOLUTIONS, RD, brtAchtergrond } from "./rd";
 
 // Project 1 (centroid van een pand in Almere Centrum), RD-meters
@@ -139,6 +141,12 @@ if (!FOUT) {
     balk.append(b);
   }
   wissel(startLaag);
+}
+
+// Les 15: tekenbalk (alleen als de pagina er een heeft; de Django-pagina /kaart/ heeft hem)
+const tekenBalk = document.getElementById("teken");
+if (tekenBalk && !FOUT) {
+  startTekenen(kaart, tekenBalk, document.body.dataset.ingelogd === "ja", document.body.dataset.gebruiker ?? "");
 }
 
 // Statusregel: stelsel, zoomniveau, resolutie

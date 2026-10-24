@@ -112,6 +112,8 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+# Les 15: `npm run build` (Vite) schrijft naar kaart/static/app/, met manifest in .vite/
+VITE_MANIFEST = BASE_DIR / "kaart" / "static" / "app" / ".vite" / "manifest.json"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 LOGGING = {

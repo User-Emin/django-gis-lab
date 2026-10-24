@@ -1,8 +1,14 @@
+import json
+
+from django.contrib.gis.geos import GEOSGeometry, Polygon
 from django_filters import rest_framework as df
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
-from rest_framework import viewsets
+from rest_framework import mixins, serializers, status, viewsets
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.exceptions import ParseError
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.response import Response
 from rest_framework_gis.fields import GeometryField
 from rest_framework_gis.filters import (
     DistanceToPointFilter,
@@ -165,3 +171,67 @@ class ProjectViewSet(viewsets.ReadOnlyModelViewSet):
     bbox_filter_field = "locatie"
     filter_backends = [SridBBoxFilter, df.DjangoFilterBackend]
     filterset_fields = ["status"]
+
+
+# Les 15: schrijven. Alleen dit endpoint vraagt inloggen; de rest blijft AllowAny/alleen lezen.
+RD_GRENZEN = (-7000, 289000, 300000, 629000)  # geldigheidsgebied RD New (EPSG:28992), meters
+
+
+class GebiedSerializer(GeoFeatureModelSerializer):
+    gebied = SridGeometryField()
+
+    class Meta:
+        model = Project
+        geo_field = "gebied"
+        fields = ["id", "naam"]
+
+
+class GebiedInvoer(serializers.Serializer):
+    """Body van POST /api/gebieden/: {"project": <id>, "geometry": <GeoJSON Polygon in RD>}."""
+
+    project = serializers.PrimaryKeyRelatedField(queryset=Project.objects.all())
+    geometry = serializers.JSONField()
+
+    def validate_geometry(self, waarde):
+        try:
+            geom = GEOSGeometry(json.dumps(waarde))
+            geom.srid = 28992  # GeoJSON-parsing zet 4326; deze API spreekt RD (zoals ?srid=28992)
+        except Exception:
+            raise serializers.ValidationError("Geen geldige GeoJSON-geometrie.") from None
+        if not isinstance(geom, Polygon):
+            raise serializers.ValidationError("Alleen een Polygon, geen " + geom.geom_type + ".")
+        if not geom.valid:
+            raise serializers.ValidationError(f"Ongeldig vlak: {geom.valid_reason}")
+        minx, miny, maxx, maxy = geom.extent
+        if not (RD_GRENZEN[0] <= minx and maxx <= RD_GRENZEN[2]):
+            raise serializers.ValidationError("x buiten het RD-gebied (-7000 tot 300000 m).")
+        if not (RD_GRENZEN[1] <= miny and maxy <= RD_GRENZEN[3]):
+            raise serializers.ValidationError("y buiten het RD-gebied (289000 tot 629000 m).")
+        return geom
+
+
+@extend_schema_view(list=extend_schema(parameters=[SRID_PARAM]))
+class GebiedViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    """GET: projecten met een getekend gebied (GeoJSON). POST: gebied van een project opslaan.
+
+    Schrijven vereist een sessie (SessionAuthentication) én het CSRF-token in X-CSRFToken.
+    """
+
+    queryset = Project.objects.filter(gebied__isnull=False)
+    serializer_class = GebiedSerializer
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    bbox_filter_field = "gebied"
+    filter_backends = [SridBBoxFilter]
+
+    @extend_schema(request=GebiedInvoer, responses={201: GebiedSerializer})
+    def create(self, request):
+        invoer = GebiedInvoer(data=request.data)
+        invoer.is_valid(raise_exception=True)
+        project = invoer.validated_data["project"]
+        project.gebied = invoer.validated_data["geometry"]
+        project.save(update_fields=["gebied"])
+        return Response(
+            GebiedSerializer(project, context={"request": request}).data,
+            status=status.HTTP_201_CREATED,
+        )

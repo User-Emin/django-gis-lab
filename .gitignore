@@ -13,3 +13,4 @@ _manifests/
 .coverage
 node_modules/
 frontend/dist/
+kaart/static/app/

@@ -1,0 +1,17 @@
+{% load vite %}<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Projectkaart</title>
+    {% vite_css "src/main.ts" %}
+  </head>
+  <body data-ingelogd="{{ user.is_authenticated|yesno:'ja,nee' }}" data-gebruiker="{{ user.get_username }}">
+    <div id="kaart"></div>
+    <div id="lagen"></div>
+    <div id="info"></div>
+    <div id="popup" hidden></div>
+    <div id="teken" hidden></div>
+    {% vite_js "src/main.ts" %}
+  </body>
+</html>

@@ -67,6 +67,12 @@ def lagen(doc: Drawing) -> list[dict]:
     ]
 
 
+def ongebruikte_lagen(doc: Drawing) -> list[str]:
+    """Lagen waar geen enkele entiteit in de modelspace op staat (Zelf, les 17)."""
+    gebruikt = {e.dxf.layer for e in doc.modelspace()}
+    return [laag["naam"] for laag in lagen(doc) if laag["naam"] not in gebruikt]
+
+
 def blocks(doc: Drawing) -> dict[str, list[str]]:
     """BLOCKS: naam -> tags van de ATTDEFs. Systeemblocks (*Model_Space, *D1) blijven weg."""
     return {

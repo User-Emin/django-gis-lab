@@ -99,3 +99,12 @@ def test_dxf_inhoud_geeft_nette_fout_bij_ontbrekend_bestand():
 
     with pytest.raises(CommandError):
         call_command("dxf_inhoud", DATA / "bestaat-niet.dxf")
+
+
+def test_ongebruikte_lagen(doc):
+    assert dxf.ongebruikte_lagen(doc) == ["Defpoints"]
+
+
+def test_ongebruikte_lagen_staat_in_dxf_inhoud(capsys):
+    call_command("dxf_inhoud", "data/cad/plattegrond-bg.dxf")
+    assert "Ongebruikte lagen: Defpoints" in capsys.readouterr().out

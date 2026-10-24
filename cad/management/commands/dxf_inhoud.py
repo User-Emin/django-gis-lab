@@ -42,6 +42,8 @@ class Command(BaseCommand):
                 f"{laag['aan']!s:>5} {laag['bevroren']!s:>8}"
             )
 
+        out(f"Ongebruikte lagen: {', '.join(dxf.ongebruikte_lagen(doc)) or '-'}")
+
         out("\n== BLOCKS")
         for naam, attdefs in dxf.blocks(doc).items():
             out(f"{naam}  ATTDEF: {', '.join(attdefs) or '-'}")

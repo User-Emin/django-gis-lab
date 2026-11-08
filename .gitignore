@@ -16,3 +16,7 @@ frontend/dist/
 kaart/static/app/
 media/
 .run/
+
+# .NET
+bin/
+obj/

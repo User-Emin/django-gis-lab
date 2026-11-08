@@ -63,8 +63,15 @@ pythonpath = ["pipeline", "pipeline/django-integratie"]
 testpaths = ["kaart", "cad", "autocad", "pipeline"]
 
 [tool.coverage.run]
-source = ["kaart"]
-omit = ["*/migrations/*", "*/tests/*", "kaart/management/*"]
+# les 31: dekking over alle Python-pakketten die SonarQube als bron ziet. source = "." met
+# relative_files geeft padnamen vanaf de repo-root; Sonar koppelt anders bestanden met dezelfde
+# naam (models.py, views.py in kaart/ en cad/) aan het verkeerde pakket.
+source = ["."]
+relative_files = true
+omit = [
+    ".venv/*", "*/migrations/*", "*/tests/*", "kaart/management/*", "manage.py",
+    "scripts/*", "frontend/*", "ansible/*", "deploy/*", "werkplek/*", "data/*",
+]
 
 [tool.coverage.report]
 show_missing = true

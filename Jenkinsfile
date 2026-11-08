@@ -62,10 +62,15 @@ pipeline {
         }
 
         stage('Sonar') {
-            // les 31/32: SonarQube-scan en kwaliteitspoort
-            when { expression { false } }
+            // les 31: SonarQube-scan en kwaliteitspoort. Keuze: de poort met een sh-stap (api/ce/task +
+            // api/qualitygates/project_status) i.p.v. waitForQualityGate: dat vraagt de SonarQube-plugin
+            // en een webhook van Sonar naar Jenkins; de sh-variant werkt met alleen een token.
+            environment {
+                SONAR_TOKEN = credentials('sonar-token')
+            }
             steps {
-                echo 'Sonar volgt in les 31'
+                sh 'uvx pysonar --sonar-host-url=http://127.0.0.1:8792'
+                sh 'uv run python scripts/sonar_gate.py'
             }
         }
 

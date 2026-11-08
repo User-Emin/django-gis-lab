@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Les 29: commit-msg-hook die een JIRA-key aan het begin van de commit-titel eist (bv. "GEO-42 ...").
+# Installeren: make hooks   (zet core.hooksPath op scripts/hooks)
+set -euo pipefail
+
+bericht_bestand="$1"
+titel="$(grep -v '^#' "$bericht_bestand" | sed -n '1p')"
+
+# Merge-, revert-, fixup- en squash-commits die Git zelf maakt, laten we door.
+if [[ "$titel" =~ ^(Merge|Revert|fixup!|squash!) ]]; then
+  exit 0
+fi
+
+if [[ ! "$titel" =~ ^[A-Z][A-Z0-9]+-[0-9]+ ]]; then
+  echo "commit geweigerd: de titel moet beginnen met een JIRA-key, bv. 'GEO-42 Korte omschrijving'." >&2
+  echo "gekregen: '$titel'" >&2
+  exit 1
+fi

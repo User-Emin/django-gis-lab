@@ -37,5 +37,6 @@ Meewerken: zie `CONTRIBUTING.md`.
 | les-22 | AutoCAD in de pipeline: `pipeline/` (accoreconsole-batch, APS Design Automation-client met respx-tests, Django-schets), `cad/opslag.py`, Celery + Redis (poort 6390) met `cad.rcs_check` en een taakstatuspagina |
 | les-33 | Ansible-uitrol: `ansible/` (inventory, `site.yml`, rol `djangolab`, vault voor het geheim), release-map + `current`-symlink, `rollback.yml`; `make uitrol-check` en `make uitrol` |
 | les-34 | gunicorn + nginx: `deploy/gunicorn.conf.py`, `deploy/nginx/djangolab.conf` (127.0.0.1:8793 naar 8701, static-alias, `client_max_body_size`), `deploy/systemd/` (alleen gerenderd), graceful reload met `kill -HUP` |
+| les-35 | AutoCAD 2020-plugin met PostGIS: `autocad/dotnet2020/` (net47, AutoCAD.NET 23.1.0, Npgsql 8.0.9), `RVBNAARPOSTGIS`, pure logica + xUnit, `sql/cad_ruimte_import.sql`, CI-job `autocad2020` (windows-latest); niet in AutoCAD uitgevoerd |
 
 Database: PostgreSQL op 127.0.0.1:5433, database `djangolab`.

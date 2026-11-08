@@ -1,0 +1,11 @@
+# Alleen gerenderd, niet gedraaid (geen systemd op macOS). Pad: /etc/systemd/system/djangolab.socket
+[Unit]
+Description=Projectkaart gunicorn-socket
+
+[Socket]
+ListenStream=/run/djangolab/gunicorn.sock
+SocketUser=www-data
+SocketMode=600
+
+[Install]
+WantedBy=sockets.target

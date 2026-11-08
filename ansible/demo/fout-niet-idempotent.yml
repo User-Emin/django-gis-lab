@@ -1,0 +1,8 @@
+---
+# BEWUST FOUT: elke run geeft changed, ook als er niets verandert.
+- hosts: djangolab
+  tasks:
+    - name: marker aanmaken (command ziet geen verschil)
+      ansible.builtin.shell: echo klaar > /tmp/djangolab-marker.txt
+    - name: versie opvragen (leest alleen)
+      ansible.builtin.command: uv --version

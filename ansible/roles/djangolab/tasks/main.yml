@@ -1,0 +1,98 @@
+---
+- name: Release-id bepalen (commit-tijd + hash, dus deterministisch)
+  ansible.builtin.command: git -C {{ djangolab_repo }} log -1 --format=%cd-%h --date=format:%Y%m%d%H%M%S
+  delegate_to: localhost
+  register: djangolab_git
+  changed_when: false
+  check_mode: false
+
+- name: Release-map en gedeelde mappen
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - "{{ djangolab_releases }}"
+    - "{{ djangolab_shared }}"
+    - "{{ djangolab_shared }}/run"
+    - "{{ djangolab_nginx_prefix }}"
+
+- name: Release-map voor deze commit
+  ansible.builtin.set_fact:
+    djangolab_release: "{{ djangolab_releases }}/{{ djangolab_git.stdout }}"
+
+- name: Release-map aanmaken
+  ansible.builtin.file:
+    path: "{{ djangolab_release }}"
+    state: directory
+    mode: "0755"
+
+- name: Code uitpakken uit git (alleen als nog niet aanwezig)
+  ansible.builtin.shell: git -C {{ djangolab_repo }} archive HEAD | tar -x -C {{ djangolab_release }}
+  args:
+    creates: "{{ djangolab_release }}/manage.py"
+
+- name: Frontend-build meenemen (staat niet in git)
+  ansible.builtin.shell: mkdir -p {{ djangolab_release }}/kaart/static && cp -R {{ djangolab_frontend_build }} {{ djangolab_release }}/kaart/static/app
+  args:
+    creates: "{{ djangolab_release }}/kaart/static/app"
+    removes: "{{ djangolab_frontend_build }}"
+
+- name: Geheimen en instellingen (omgevingsbestand, alleen eigenaar)
+  ansible.builtin.template:
+    src: djangolab.env.j2
+    dest: "{{ djangolab_shared }}/djangolab.env"
+    mode: "0600"
+  no_log: true
+  notify: gunicorn herstarten
+
+- name: Virtualenv met uv (alleen als nog niet aanwezig)
+  ansible.builtin.shell: cd {{ djangolab_release }} && uv sync --frozen --no-dev
+  args:
+    creates: "{{ djangolab_release }}/.venv/bin/gunicorn"
+
+- name: collectstatic (alleen als nog niet gedaan)
+  ansible.builtin.shell: cd {{ djangolab_release }} && set -a && . {{ djangolab_shared }}/djangolab.env && set +a && .venv/bin/python manage.py collectstatic --noinput
+  args:
+    creates: "{{ djangolab_release }}/staticfiles/admin"
+
+- name: Migraties tegen PostGIS
+  ansible.builtin.shell: cd {{ djangolab_release }} && set -a && . {{ djangolab_shared }}/djangolab.env && set +a && .venv/bin/python manage.py migrate --noinput
+  register: djangolab_migrate
+  changed_when: "'No migrations to apply' not in djangolab_migrate.stdout"
+
+- name: gunicorn-configuratie
+  ansible.builtin.template:
+    src: gunicorn.conf.py.j2
+    dest: "{{ djangolab_shared }}/gunicorn.conf.py"
+    mode: "0644"
+  notify: gunicorn herstarten
+
+- name: nginx-serverblok
+  ansible.builtin.template:
+    src: djangolab-nginx.conf.j2
+    dest: "{{ djangolab_nginx_conf_dest }}"
+    mode: "0644"
+  notify: nginx herladen
+
+- name: Beheerscript (start/stop/herstart)
+  ansible.builtin.template:
+    src: ctl.sh.j2
+    dest: "{{ djangolab_shared }}/ctl.sh"
+    mode: "0755"
+
+- name: current-symlink naar deze release
+  ansible.builtin.file:
+    src: "{{ djangolab_release }}"
+    dest: "{{ djangolab_current }}"
+    state: link
+    force: "{{ ansible_check_mode }}"  # --check: de release-map bestaat dan nog niet
+  notify: gunicorn herstarten
+
+- name: Handlers nu uitvoeren (gunicorn pakt het nieuwe pad pas na herstart op)
+  ansible.builtin.meta: flush_handlers
+
+- name: Oude releases opruimen (houd de laatste {{ djangolab_keep_releases }})
+  ansible.builtin.shell: ls -1dt {{ djangolab_releases }}/* | tail -n +{{ djangolab_keep_releases + 1 }} | xargs -I{} rm -rf {}
+  register: djangolab_cleanup
+  changed_when: false

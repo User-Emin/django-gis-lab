@@ -1,0 +1,9 @@
+# {{ ansible_managed }}
+bind = "{{ djangolab_bind }}"
+workers = {{ djangolab_workers }}
+timeout = {{ djangolab_timeout }}
+graceful_timeout = 30
+pidfile = "{{ djangolab_shared }}/run/gunicorn.pid"
+accesslog = "{{ djangolab_shared }}/run/gunicorn-access.log"
+errorlog = "{{ djangolab_shared }}/run/gunicorn-error.log"
+capture_output = True

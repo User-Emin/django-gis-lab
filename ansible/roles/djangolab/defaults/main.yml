@@ -1,0 +1,20 @@
+---
+djangolab_home: "{{ lookup('env', 'HOME') }}"
+djangolab_base: "{{ djangolab_home }}/django-lab-h/srv"
+djangolab_releases: "{{ djangolab_base }}/releases"
+djangolab_shared: "{{ djangolab_base }}/shared"
+djangolab_current: "{{ djangolab_base }}/current"
+djangolab_repo: "{{ playbook_dir }}/.."
+djangolab_keep_releases: 3
+djangolab_bind: 127.0.0.1:8701
+djangolab_workers: 2
+djangolab_timeout: 30
+djangolab_listen: 127.0.0.1:8793
+djangolab_nginx_prefix: "{{ djangolab_home }}/django-lab-h/nginx"
+# Lab: de les-34-nginx leest dit bestand. Op een server: /etc/nginx/conf.d/djangolab.conf
+djangolab_nginx_conf_dest: "{{ djangolab_nginx_prefix }}/djangolab.rendered.conf"
+# Vite-build staat niet in git; bron voor kaart/static/app (leeg = overslaan)
+djangolab_frontend_build: "{{ djangolab_home }}/django-lab/kaart/static/app"
+# Systeembibliotheken voor GeoDjango (macOS/Homebrew; op Linux meestal niet nodig: leeg laten)
+djangolab_gdal_library_path: /opt/homebrew/lib/libgdal.dylib
+djangolab_geos_library_path: /opt/homebrew/lib/libgeos_c.dylib

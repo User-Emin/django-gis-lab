@@ -1,0 +1,25 @@
+# {{ ansible_managed }}
+upstream djangolab {
+    server {{ djangolab_bind }};
+}
+
+server {
+    listen {{ djangolab_listen }};
+    server_name 127.0.0.1 localhost;
+    client_max_body_size 12m;
+
+    location /static/ {
+        alias {{ djangolab_current }}/staticfiles/;
+        expires 1h;
+    }
+
+    location / {
+        proxy_pass http://djangolab;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 35s;
+        proxy_redirect off;
+    }
+}

@@ -1,0 +1,7 @@
+---
+# Niet-geheime instellingen. Het geheim staat in vault.yml (versleuteld) onder vault_django_secret_key.
+djangolab_db_name: djangolab
+djangolab_db_host: 127.0.0.1
+djangolab_db_port: 5433
+djangolab_allowed_hosts: "127.0.0.1,localhost"
+djangolab_django_secret_key: "{{ vault_django_secret_key }}"

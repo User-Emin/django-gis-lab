@@ -1,0 +1,24 @@
+---
+# Rollback: current terug naar de vorige release (of -e naar=<release-id>).
+# Let op: migraties worden NIET teruggedraaid.
+- name: Rollback naar vorige release
+  hosts: djangolab
+  vars:
+    base: "{{ lookup('env', 'HOME') }}/django-lab-h/srv"
+  tasks:
+    - name: Releases op volgorde van aanmaak
+      ansible.builtin.shell: ls -1t {{ base }}/releases
+      register: releases
+      changed_when: false
+    - name: Doel bepalen
+      ansible.builtin.set_fact:
+        doel: "{{ naar | default(releases.stdout_lines[1]) }}"
+    - name: current terugzetten
+      ansible.builtin.file:
+        src: "{{ base }}/releases/{{ doel }}"
+        dest: "{{ base }}/current"
+        state: link
+      notify: gunicorn herstarten
+  handlers:
+    - name: gunicorn herstarten
+      ansible.builtin.command: "{{ base }}/shared/ctl.sh gunicorn-restart"

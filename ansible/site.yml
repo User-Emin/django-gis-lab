@@ -1,0 +1,5 @@
+---
+- name: Projectkaart uitrollen
+  hosts: djangolab
+  roles:
+    - djangolab

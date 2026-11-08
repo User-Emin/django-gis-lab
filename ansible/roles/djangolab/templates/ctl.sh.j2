@@ -1,0 +1,19 @@
+#!/bin/bash
+# {{ ansible_managed }}
+# Gebruik: ctl.sh {gunicorn-restart|gunicorn-stop|nginx-reload|nginx-stop}
+S={{ djangolab_shared }}
+PID=$S/run/gunicorn.pid
+NGX="nginx -p {{ djangolab_nginx_prefix }}/ -c {{ djangolab_nginx_prefix }}/nginx.conf"
+gu_stop() { [ -f $PID ] && kill -TERM "$(cat $PID)" 2>/dev/null && while kill -0 "$(cat $PID)" 2>/dev/null; do sleep 0.2; done; return 0; }
+case "$1" in
+  gunicorn-restart)
+    gu_stop
+    # Fysieke cwd van het oude proces wijst naar de oude release; daarom echt herstarten, geen HUP.
+    cd {{ djangolab_current }} && set -a && . $S/djangolab.env && set +a && \
+      .venv/bin/gunicorn -c $S/gunicorn.conf.py -D projectkaart.wsgi:application;;
+  gunicorn-stop) gu_stop;;
+  nginx-reload)
+    $NGX -t && { [ -f {{ djangolab_nginx_prefix }}/run/nginx.pid ] && $NGX -s reload || $NGX; };;
+  nginx-stop) [ -f {{ djangolab_nginx_prefix }}/run/nginx.pid ] && $NGX -s quit; true;;
+  *) echo "gebruik: $0 {gunicorn-restart|gunicorn-stop|nginx-reload|nginx-stop}"; exit 2;;
+esac

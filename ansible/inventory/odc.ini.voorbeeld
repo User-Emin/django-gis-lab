@@ -1,0 +1,9 @@
+# VOORBEELD, FICTIEF: de echte hostnamen van het ODC zijn onbekend.
+# Kopieer naar inventory/odc.ini en vul in; draai met: ansible-playbook -i inventory/odc.ini site.yml
+[djangolab]
+app01.voorbeeld.local
+app02.voorbeeld.local
+
+[djangolab:vars]
+ansible_user=deploy
+ansible_become=true

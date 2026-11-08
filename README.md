@@ -35,6 +35,7 @@ Meewerken: zie `CONTRIBUTING.md`.
 | les-20 | Terug naar CAD: `exporteer_dxf` (GIS naar DXF met RCS-laagnamen, inverse georef, `$INSUNITS`), rondreis, `ogr2ogr -f DXF` ter vergelijking, DWG (CAD-driver alleen lezen) |
 | les-21 | AutoCAD automatiseren: `autocad/` met RCS-laagcontrole in LISP, `.scr`, .NET (niet gecompileerd), COM (alleen Windows) en Python/ezdxf (shapely: overlap, is_valid), bulge-oppervlakte |
 | les-22 | AutoCAD in de pipeline: `pipeline/` (accoreconsole-batch, APS Design Automation-client met respx-tests, Django-schets), `cad/opslag.py`, Celery + Redis (poort 6390) met `cad.rcs_check` en een taakstatuspagina |
+| les-33 | Ansible-uitrol: `ansible/` (inventory, `site.yml`, rol `djangolab`, vault voor het geheim), release-map + `current`-symlink, `rollback.yml`; `make uitrol-check` en `make uitrol` |
 | les-34 | gunicorn + nginx: `deploy/gunicorn.conf.py`, `deploy/nginx/djangolab.conf` (127.0.0.1:8793 naar 8701, static-alias, `client_max_body_size`), `deploy/systemd/` (alleen gerenderd), graceful reload met `kill -HUP` |
 
 Database: PostgreSQL op 127.0.0.1:5433, database `djangolab`.

@@ -1,0 +1,11 @@
+---
+# GEFIXT: creates: voor wat eenmalig is, changed_when: false voor wat alleen leest.
+- hosts: djangolab
+  tasks:
+    - name: marker aanmaken
+      ansible.builtin.shell: echo klaar > /tmp/djangolab-marker.txt
+      args:
+        creates: /tmp/djangolab-marker.txt
+    - name: versie opvragen (leest alleen)
+      ansible.builtin.command: uv --version
+      changed_when: false

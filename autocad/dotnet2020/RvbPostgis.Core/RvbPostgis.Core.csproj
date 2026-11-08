@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Pure logica + Npgsql-schrijver. GEEN AutoCAD-verwijzing: dit project bouwt en test overal waar net47 draait. -->
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net47</TargetFramework>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <RootNamespace>RvbPostgis.Core</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Npgsql 8.0.x is de laatste lijn met een netstandard2.0-groep (dus bruikbaar op .NET Framework). -->
+    <PackageReference Include="Npgsql" Version="8.0.9" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+  </ItemGroup>
+</Project>

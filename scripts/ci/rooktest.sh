@@ -27,7 +27,7 @@ docker rm -f "$NAME" "${NAME}-worker" "${NAME}-redis" >/dev/null 2>&1 || true
 if [ "$UITGEBREID" = "1" ]; then
   # Redis alleen op het standaard bridge-netwerk, nooit met -p; web en worker (host-netwerk) gebruiken het IP.
   docker run -d --name "${NAME}-redis" redis:7.4.8-alpine >/dev/null
-  REDIS_IP="$(docker inspect --format '{{.NetworkSettings.IPAddress}}' "${NAME}-redis")"
+  REDIS_IP="$(docker inspect --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "${NAME}-redis")"
   DB_ENV+=(-e "CELERY_BROKER_URL=redis://${REDIS_IP}:6379/0" -e "CELERY_RESULT_BACKEND=redis://${REDIS_IP}:6379/1")
   echo "== check --deploy (prod-instellingen in de image)"
   docker run --rm --network host "${DB_ENV[@]}" "$IMAGE" python manage.py check --deploy --fail-level WARNING

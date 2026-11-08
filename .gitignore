@@ -26,3 +26,6 @@ reports/
 # .NET
 bin/
 obj/
+
+# Les 31: scanner-werkmap
+.scannerwork/

@@ -17,8 +17,14 @@ kaart/static/app/
 media/
 .run/
 
+<<<<<<< HEAD
 # Les 30: build- en rapportageuitvoer van de Jenkins-pipeline
 build/
 dist/
 *.egg-info/
 reports/
+=======
+# .NET
+bin/
+obj/
+>>>>>>> 00e4ee8 (feat(autocad): RVBNAARPOSTGIS voor AutoCAD 2020 (net47, Npgsql 8.0.9) + CI-job autocad2020 (les 35))

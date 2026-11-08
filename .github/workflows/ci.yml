@@ -107,6 +107,35 @@ jobs:
       - name: dotnet build RcsCheck (NuGet-referenties AutoCAD.NET.Core/Model)
         run: dotnet build autocad/dotnet/RcsCheck -c Release
 
+  autocad2020:
+    name: autocad2020
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+      - name: Runner-image en dotnet (voor gemeten.md)
+        shell: pwsh
+        run: |
+          Write-Host "ImageVersion: $env:ImageVersion"
+          dotnet --info | Select-String "Version|RID"
+      - name: dotnet restore (net47, AutoCAD.NET 23.1.0, Npgsql 8.0.9)
+        run: dotnet restore autocad/dotnet2020/RvbPostgis/RvbPostgis.csproj
+      - name: dotnet build plugin (AutoCAD 2020, net47)
+        run: dotnet build autocad/dotnet2020/RvbPostgis/RvbPostgis.csproj -c Release --no-restore
+      - name: dotnet test (pure logica, net47)
+        run: dotnet test autocad/dotnet2020/RvbPostgis.Tests/RvbPostgis.Tests.csproj -c Release
+      - name: Uitvoermap (AutoCAD-DLL's mogen er niet in staan)
+        shell: pwsh
+        run: Get-ChildItem autocad/dotnet2020/RvbPostgis/bin/Release/net47 | Select-Object Name, Length
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RvbPostgis-net47
+          path: autocad/dotnet2020/RvbPostgis/bin/Release/net47/
+          if-no-files-found: error
+
   docker:
     name: docker
     runs-on: ubuntu-latest

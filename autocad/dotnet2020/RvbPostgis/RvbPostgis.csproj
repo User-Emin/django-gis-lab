@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- AutoCAD 2020 = .NET Framework 4.7 (Autodesk ObjectARX-gids 2020) en AutoCAD.NET 23.1.0 (NuGet).
+       ⚠️ Gebouwd in CI (windows-latest); niet in AutoCAD uitgevoerd. -->
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net47</TargetFramework>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <RootNamespace>RvbPostgis</RootNamespace>
+    <AssemblyName>RvbPostgis</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- ExcludeAssets=runtime: AutoCAD levert AcMgd/AcDbMgd/AcCoreMgd zelf; ze mogen niet naast de plugin worden gekopieerd.
+         Alle drie expliciet, zodat ook de transitieve Core/Model niet meekomen. -->
+    <PackageReference Include="AutoCAD.NET" Version="23.1.0" ExcludeAssets="runtime" />
+    <PackageReference Include="AutoCAD.NET.Core" Version="23.1.0" ExcludeAssets="runtime" />
+    <PackageReference Include="AutoCAD.NET.Model" Version="23.1.0" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+    <ProjectReference Include="..\RvbPostgis.Core\RvbPostgis.Core.csproj" />
+  </ItemGroup>
+</Project>

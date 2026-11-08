@@ -1,4 +1,9 @@
-.PHONY: check fix test
+.PHONY: check fix test hooks
+
+# Les 29: git-hooks uit scripts/hooks activeren (commit-msg eist een JIRA-key)
+hooks:
+	git config core.hooksPath scripts/hooks
+	@echo "core.hooksPath = $$(git config core.hooksPath)"
 
 # Les 04 (Zelf): één commando voor stijlcontrole
 check:

@@ -35,6 +35,8 @@ Meewerken: zie `CONTRIBUTING.md`.
 | les-20 | Terug naar CAD: `exporteer_dxf` (GIS naar DXF met RCS-laagnamen, inverse georef, `$INSUNITS`), rondreis, `ogr2ogr -f DXF` ter vergelijking, DWG (CAD-driver alleen lezen) |
 | les-21 | AutoCAD automatiseren: `autocad/` met RCS-laagcontrole in LISP, `.scr`, .NET (niet gecompileerd), COM (alleen Windows) en Python/ezdxf (shapely: overlap, is_valid), bulge-oppervlakte |
 | les-22 | AutoCAD in de pipeline: `pipeline/` (accoreconsole-batch, APS Design Automation-client met respx-tests, Django-schets), `cad/opslag.py`, Celery + Redis (poort 6390) met `cad.rcs_check` en een taakstatuspagina |
+| les-31 | SonarQube Community Build (127.0.0.1:8792): `sonar-project.properties`, dekking over alle pakketten (`[tool.coverage.run]`), Jenkins-stage `Sonar` met `pysonar` en `scripts/sonar_gate.py` (kwaliteitspoort) |
+| les-32 | Nexus Repository (127.0.0.1:8791): `pypi-hosted`/`-proxy`/`-group`, `uv build --wheel` en `twine upload` in de stage `Publish`; dezelfde versie opnieuw uploaden geeft 409 |
 | les-33 | Ansible-uitrol: `ansible/` (inventory, `site.yml`, rol `djangolab`, vault voor het geheim), release-map + `current`-symlink, `rollback.yml`; `make uitrol-check` en `make uitrol` |
 | les-34 | gunicorn + nginx: `deploy/gunicorn.conf.py`, `deploy/nginx/djangolab.conf` (127.0.0.1:8793 naar 8701, static-alias, `client_max_body_size`), `deploy/systemd/` (alleen gerenderd), graceful reload met `kill -HUP` |
 | les-35 | AutoCAD 2020-plugin met PostGIS: `autocad/dotnet2020/` (net47, AutoCAD.NET 23.1.0, Npgsql 8.0.9), `RVBNAARPOSTGIS`, pure logica + xUnit, `sql/cad_ruimte_import.sql`, CI-job `autocad2020` (windows-latest); niet in AutoCAD uitgevoerd |

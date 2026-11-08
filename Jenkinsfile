@@ -75,10 +75,18 @@ pipeline {
         }
 
         stage('Publish') {
-            // les 31/32: wheel naar Nexus
-            when { expression { false } }
+            // les 32: wheel naar Nexus (pypi-hosted). Opnieuw dezelfde versie uploaden geeft 409:
+            // pypi-hosted staat op ALLOW_ONCE, dus elke release heeft een nieuw versienummer nodig.
+            environment {
+                NEXUS = credentials('nexus-ci') // zet NEXUS_USR en NEXUS_PSW; Jenkins maskeert beide
+            }
             steps {
-                echo 'Publish volgt in les 32'
+                sh 'rm -rf dist && uv build --wheel'
+                sh '''
+                    TWINE_USERNAME="$NEXUS_USR" TWINE_PASSWORD="$NEXUS_PSW" \
+                    uvx twine upload --non-interactive \
+                        --repository-url http://127.0.0.1:8791/repository/pypi-hosted/ dist/*.whl
+                '''
             }
         }
     }

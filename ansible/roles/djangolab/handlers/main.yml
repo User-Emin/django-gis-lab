@@ -1,0 +1,6 @@
+---
+- name: gunicorn herstarten
+  ansible.builtin.command: "{{ djangolab_shared }}/ctl.sh gunicorn-restart"
+
+- name: nginx herladen
+  ansible.builtin.command: "{{ djangolab_shared }}/ctl.sh nginx-reload"

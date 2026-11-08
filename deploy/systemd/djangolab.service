@@ -1,0 +1,23 @@
+# Alleen gerenderd, niet gedraaid: deze Mac heeft geen systemd. Pad: /etc/systemd/system/djangolab.service
+# Volgens de gunicorn-docs (deploy): Type=notify, socket-activatie via djangolab.socket.
+[Unit]
+Description=Projectkaart (gunicorn)
+Requires=djangolab.socket
+After=network.target
+
+[Service]
+Type=notify
+User=djangolab
+Group=djangolab
+RuntimeDirectory=djangolab
+WorkingDirectory=/srv/djangolab/current
+EnvironmentFile=/etc/djangolab/djangolab.env
+ExecStart=/srv/djangolab/current/.venv/bin/gunicorn -c deploy/gunicorn.conf.py projectkaart.wsgi:application
+ExecReload=/bin/kill -s HUP $MAINPID
+KillMode=mixed
+TimeoutStopSec=35
+PrivateTmp=true
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

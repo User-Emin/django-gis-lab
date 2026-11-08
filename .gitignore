@@ -16,3 +16,9 @@ frontend/dist/
 kaart/static/app/
 media/
 .run/
+
+# Les 30: build- en rapportageuitvoer van de Jenkins-pipeline
+build/
+dist/
+*.egg-info/
+reports/
